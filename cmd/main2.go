@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/smartwalle/dbm"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func main() {
@@ -22,7 +21,6 @@ func main() {
 
 	fmt.Println(client.ServerVersion())
 	fmt.Println(client.TransactionAllowed())
-	return
 
-	c.InsertOne(context.Background(), bson.M{"_id": dbm.NewObjectId(), "ss": 1, "ee": "22", "ess": dbm.NewObjectId()})
+	c.InsertOne(context.Background(), dbm.M{"_id": dbm.NewObjectId(), "ss": 1, "ee": "22", "ess": dbm.NewObjectId()})
 }

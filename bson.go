@@ -22,3 +22,11 @@ func ObjectIdFromHex(s string) (ObjectId, error) {
 func IsValidObjectId(s string) bool {
 	return primitive.IsValidObjectID(s)
 }
+
+type D = primitive.D
+
+type E = primitive.E
+
+type M = primitive.M
+
+type A = primitive.A

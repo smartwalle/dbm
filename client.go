@@ -101,10 +101,6 @@ func (this *Client) Ping(ctx context.Context) error {
 	return this.client.Ping(ctx, readpref.Primary())
 }
 
-func (this *Client) Database(name string) *Database {
-	return &Database{Database: this.client.Database(name), client: this}
-}
-
 func (this *Client) ServerStatus(ctx context.Context) (bson.Raw, error) {
 	return serverStatus(ctx, this.client)
 }
@@ -115,4 +111,8 @@ func (this *Client) ServerVersion() string {
 
 func (this *Client) TransactionAllowed() bool {
 	return this.transactionAllowed
+}
+
+func (this *Client) Database(name string) *Database {
+	return &Database{Database: this.client.Database(name), client: this}
 }
