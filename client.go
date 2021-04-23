@@ -93,8 +93,8 @@ func (this *Client) Client() *mongo.Client {
 	return this.client
 }
 
-func (this *Client) Close(ctx context.Context) error {
-	return this.client.Disconnect(ctx)
+func (this *Client) Close() error {
+	return this.client.Disconnect(context.Background())
 }
 
 func (this *Client) Ping(ctx context.Context) error {

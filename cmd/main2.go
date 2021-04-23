@@ -14,7 +14,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	defer client.Close(context.Background())
+	defer client.Close()
 
 	var db = client.Database("sm")
 	var c = db.Collection("haha")
