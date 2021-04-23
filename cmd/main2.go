@@ -22,5 +22,5 @@ func main() {
 	fmt.Println(client.ServerVersion())
 	fmt.Println(client.TransactionAllowed())
 
-	c.InsertOne(context.Background(), dbm.M{"_id": dbm.NewObjectId(), "ss": 1, "ee": "22", "ess": dbm.NewObjectId()})
+	c.InsertOne(context.Background(), dbm.M{"_id": dbm.NewObjectId(), "ss": 11, "ee": "22", "ess": dbm.NewObjectId()})
 }
