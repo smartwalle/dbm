@@ -46,7 +46,7 @@ type Collection interface {
 
 	//Aggregate
 
-	Indexes() mongo.IndexView
+	IndexView() IndexView
 }
 
 type collection struct {
@@ -146,6 +146,7 @@ func (this *collection) Find(ctx context.Context, filter interface{}) Query {
 	return q
 }
 
-func (this *collection) Indexes() mongo.IndexView {
-	return this.collection.Indexes()
+func (this *collection) IndexView() IndexView {
+	var view = this.collection.Indexes()
+	return &indexView{view: view}
 }
