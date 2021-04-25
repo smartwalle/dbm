@@ -25,6 +25,43 @@ func main() {
 	var db = client.Database("sm")
 	var tUser = db.Collection("user")
 
+	_ = tUser
+
+	//var eee = client.UseSession(context.Background(), func(sCtx dbm.SessionContext) error {
+	//
+	//	sCtx.StartTransaction()
+	//	var u = &User{}
+	//	u.Id = dbm.NewObjectId()
+	//	u.Age = 10
+	//
+	//	var err error
+	//
+	//	defer func() {
+	//		if err != nil {
+	//			sCtx.AbortTransaction(sCtx)
+	//		} else {
+	//			sCtx.CommitTransaction(sCtx)
+	//		}
+	//	}()
+	//
+	//	if _, err = tUser.Insert(sCtx, u); err != nil {
+	//		fmt.Println("---")
+	//		return err
+	//	}
+	//
+	//	//u.Id = dbm.NewObjectId()
+	//
+	//	u.Age = 20
+	//
+	//	if _, err = tUser.Insert(sCtx, u); err != nil {
+	//		fmt.Println("===")
+	//		return err
+	//	}
+	//
+	//	return nil
+	//})
+	//fmt.Println(eee)
+
 	//fmt.Println(client.ServerVersion())
 	//fmt.Println(client.TransactionAllowed())
 
@@ -34,31 +71,31 @@ func main() {
 	//
 	//user.Insert(context.Background(), u1, u2, u3)
 
-	var u1 *User
-	tUser.Find(context.Background(), dbm.M{"age": 20}).One(&u1)
-	fmt.Println(u1)
-
-	var uList []*User
-	tUser.Find(context.Background(), dbm.M{}).Sort("age").All(&uList)
-	for _, u := range uList {
-		fmt.Println(u.Name, u.Age)
-	}
-
-	var cursor = tUser.Find(context.Background(), dbm.M{}).Cursor()
-	defer cursor.Close()
-	for {
-		ok := cursor.Next(context.Background())
-
-		if ok == false {
-			break
-		}
-
-		var u *User
-		err = cursor.One(context.Background(), &u)
-
-		fmt.Println(err, ok, u)
-		if err != nil {
-			break
-		}
-	}
+	//var u1 *User
+	//tUser.Find(context.Background(), dbm.M{"age": 20}).One(&u1)
+	//fmt.Println(u1)
+	//
+	//var uList []*User
+	//tUser.Find(context.Background(), dbm.M{}).Sort("age").All(&uList)
+	//for _, u := range uList {
+	//	fmt.Println(u.Name, u.Age)
+	//}
+	//
+	//var cursor = tUser.Find(context.Background(), dbm.M{}).Cursor()
+	//defer cursor.Close()
+	//for {
+	//	ok := cursor.Next(context.Background())
+	//
+	//	if ok == false {
+	//		break
+	//	}
+	//
+	//	var u *User
+	//	err = cursor.One(context.Background(), &u)
+	//
+	//	fmt.Println(err, ok, u)
+	//	if err != nil {
+	//		break
+	//	}
+	//}
 }

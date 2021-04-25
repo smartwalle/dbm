@@ -15,6 +15,10 @@ type Database interface {
 	Drop(ctx context.Context) error
 
 	Collection(name string) Collection
+
+	UseSession(ctx context.Context, fn func(sCtx SessionContext) error) error
+
+	StartSession(ctx context.Context) (SessionContext, error)
 }
 
 type database struct {
@@ -40,4 +44,12 @@ func (this *database) Drop(ctx context.Context) error {
 
 func (this *database) Collection(name string) Collection {
 	return &collection{collection: this.database.Collection(name), database: this}
+}
+
+func (this *database) UseSession(ctx context.Context, fn func(sCtx SessionContext) error) error {
+	return this.client.UseSession(ctx, fn)
+}
+
+func (this *database) StartSession(ctx context.Context) (SessionContext, error) {
+	return this.client.StartSession(ctx)
 }

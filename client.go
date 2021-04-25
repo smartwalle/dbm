@@ -2,18 +2,29 @@ package dbm
 
 import (
 	"context"
+	"errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/description"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/ocsp"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/topology"
+	"math"
 	"strconv"
 	"strings"
 	"time"
 )
 
+var (
+	ErrSessionNotSupported = errors.New("session not supported")
+)
+
 type Client struct {
 	*info
 	cfg    *Config
+	topo   *topology.Topology
 	client *mongo.Client
 }
 
@@ -23,12 +34,17 @@ type info struct {
 }
 
 func NewClient(ctx context.Context, cfg *Config) (*Client, error) {
-	var client, err = connect(ctx, cfg.ClientOptions)
+	var topo, err = connectTopology(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	sInfo, err := load(ctx, client)
+	client, err := connect(ctx, cfg.ClientOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	sInfo, err := load(ctx, topo, client)
 	if err != nil {
 		return nil, err
 	}
@@ -36,8 +52,38 @@ func NewClient(ctx context.Context, cfg *Config) (*Client, error) {
 	var nClient = &Client{}
 	nClient.info = sInfo
 	nClient.cfg = cfg
+	nClient.topo = topo
 	nClient.client = client
 	return nClient, nil
+}
+
+func connectTopology(cfg *Config) (*topology.Topology, error) {
+	connectionOpts := []topology.ConnectionOption{
+		topology.WithOCSPCache(func(ocsp.Cache) ocsp.Cache {
+			return ocsp.NewCache()
+		}),
+	}
+	serverOpts := []topology.ServerOption{
+		topology.WithConnectionOptions(func(opts ...topology.ConnectionOption) []topology.ConnectionOption {
+			return append(opts, connectionOpts...)
+		}),
+	}
+
+	var topo, err = topology.New(topology.WithConnString(func(connString connstring.ConnString) connstring.ConnString {
+		var connStr, _ = connstring.ParseAndValidate(cfg.GetURI())
+		return connStr
+	}), topology.WithServerOptions(func(option ...topology.ServerOption) []topology.ServerOption {
+		return append(option, serverOpts...)
+	}))
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err = topo.Connect(); err != nil {
+		return nil, err
+	}
+	return topo, nil
 }
 
 func connect(ctx context.Context, opts *options.ClientOptions) (*mongo.Client, error) {
@@ -55,7 +101,7 @@ func connect(ctx context.Context, opts *options.ClientOptions) (*mongo.Client, e
 	return client, nil
 }
 
-func load(ctx context.Context, client *mongo.Client) (*info, error) {
+func load(ctx context.Context, topo *topology.Topology, client *mongo.Client) (*info, error) {
 	// 获取服务器状态
 	status, err := serverStatus(ctx, client)
 	if err != nil {
@@ -71,13 +117,7 @@ func load(ctx context.Context, client *mongo.Client) (*info, error) {
 
 	var sInfo = &info{}
 	sInfo.version = version
-
-	var versions = strings.Split(version, ".")
-	if len(versions) > 0 {
-		if val, _ := strconv.Atoi(versions[0]); val >= 4 {
-			sInfo.transactionAllowed = true
-		}
-	}
+	sInfo.transactionAllowed = topo.Kind() != description.Single && CompareServerVersions(sInfo.version, "4.0.0") > 0
 	return sInfo, nil
 }
 
@@ -115,4 +155,46 @@ func (this *Client) TransactionAllowed() bool {
 
 func (this *Client) Database(name string) *database {
 	return &database{database: this.client.Database(name), client: this}
+}
+
+func (this *Client) UseSession(ctx context.Context, fn func(sCtx SessionContext) error) error {
+	if this.transactionAllowed == false {
+		return ErrSessionNotSupported
+	}
+	return this.client.UseSession(ctx, fn)
+}
+
+func (this *Client) StartSession(ctx context.Context) (SessionContext, error) {
+	if this.transactionAllowed == false {
+		return nil, ErrSessionNotSupported
+	}
+
+	var sess, err = this.client.StartSession()
+	if err != nil {
+		return nil, err
+	}
+	return mongo.NewSessionContext(ctx, sess), nil
+}
+
+func CompareServerVersions(v1 string, v2 string) int {
+	n1 := strings.Split(v1, ".")
+	n2 := strings.Split(v2, ".")
+
+	for i := 0; i < int(math.Min(float64(len(n1)), float64(len(n2)))); i++ {
+		i1, err := strconv.Atoi(n1[i])
+		if err != nil {
+			return 1
+		}
+
+		i2, err := strconv.Atoi(n2[i])
+		if err != nil {
+			return -1
+		}
+
+		difference := i1 - i2
+		if difference != 0 {
+			return difference
+		}
+	}
+	return 0
 }
