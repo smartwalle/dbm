@@ -8,6 +8,8 @@ import (
 )
 
 type Collection interface {
+	Database() Database
+
 	Collection() *mongo.Collection
 
 	Name() string
@@ -16,8 +18,6 @@ type Collection interface {
 
 	// Clone
 	// Indexes
-
-	Database() *Database
 
 	InsertOne(ctx context.Context, document interface{}) (*InsertOneResult, error)
 
@@ -50,7 +50,11 @@ type Collection interface {
 
 type collection struct {
 	collection *mongo.Collection
-	database   *Database
+	database   Database
+}
+
+func (this *collection) Database() Database {
+	return this.database
 }
 
 func (this *collection) Collection() *mongo.Collection {
@@ -63,10 +67,6 @@ func (this *collection) Name() string {
 
 func (this *collection) Drop(ctx context.Context) error {
 	return this.collection.Drop(ctx)
-}
-
-func (this *collection) Database() *Database {
-	return this.database
 }
 
 func (this *collection) InsertOne(ctx context.Context, document interface{}) (*InsertOneResult, error) {
