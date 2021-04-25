@@ -16,8 +16,7 @@ type Collection interface {
 
 	Drop(ctx context.Context) error
 
-	// Clone
-	// Indexes
+	Clone() (Collection, error)
 
 	InsertOne(ctx context.Context, document interface{}) (*InsertOneResult, error)
 
@@ -46,6 +45,8 @@ type Collection interface {
 	Find(ctx context.Context, filter interface{}) Query
 
 	//Aggregate
+
+	Indexes() mongo.IndexView
 }
 
 type collection struct {
@@ -67,6 +68,14 @@ func (this *collection) Name() string {
 
 func (this *collection) Drop(ctx context.Context) error {
 	return this.collection.Drop(ctx)
+}
+
+func (this *collection) Clone() (Collection, error) {
+	var nCollection, err = this.collection.Clone()
+	if err != nil {
+		return nil, err
+	}
+	return &collection{collection: nCollection, database: this.database}, nil
 }
 
 func (this *collection) InsertOne(ctx context.Context, document interface{}) (*InsertOneResult, error) {
@@ -135,4 +144,8 @@ func (this *collection) Find(ctx context.Context, filter interface{}) Query {
 	q.collection = this.collection
 	q.filter = filter
 	return q
+}
+
+func (this *collection) Indexes() mongo.IndexView {
+	return this.collection.Indexes()
 }
