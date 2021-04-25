@@ -16,8 +16,10 @@ type Query interface {
 	Hint(hint interface{}) Query
 
 	One(result interface{}) error
-	//All(result interface{}) error
-	//Count() (n int64, err error)
+	All(result interface{}) error
+	Count() (int64, error)
+
+	Cursor() Cursor
 }
 
 type query struct {
@@ -105,4 +107,44 @@ func (this *query) One(result interface{}) error {
 		opts.SetHint(this.hint)
 	}
 	return this.collection.FindOne(this.ctx, this.filter, opts).Decode(result)
+}
+
+func (this *query) All(result interface{}) error {
+	var cur = this.Cursor()
+	return cur.All(this.ctx, result)
+}
+
+func (this *query) Count() (n int64, err error) {
+	var opts = options.Count()
+
+	if this.limit != nil {
+		opts.SetLimit(*this.limit)
+	}
+	if this.skip != nil {
+		opts.SetSkip(*this.skip)
+	}
+	return this.collection.CountDocuments(this.ctx, this.filter, opts)
+}
+
+func (this *query) Cursor() Cursor {
+	var opts = options.Find()
+
+	if this.sort != nil {
+		opts.SetSort(this.sort)
+	}
+	if this.project != nil {
+		opts.SetProjection(this.project)
+	}
+	if this.limit != nil {
+		opts.SetLimit(*this.limit)
+	}
+	if this.skip != nil {
+		opts.SetSkip(*this.skip)
+	}
+	if this.hint != nil {
+		opts.SetHint(this.hint)
+	}
+
+	var cur, err = this.collection.Find(this.ctx, this.filter, opts)
+	return &cursor{Cursor: cur, err: err}
 }
