@@ -19,6 +19,14 @@ func ObjectIdFromHex(s string) (ObjectId, error) {
 	return primitive.ObjectIDFromHex(s)
 }
 
+func MustObjectId(s string) ObjectId {
+	var id, err = primitive.ObjectIDFromHex(s)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 func IsValidObjectId(s string) bool {
 	return primitive.IsValidObjectID(s)
 }

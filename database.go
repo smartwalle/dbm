@@ -12,5 +12,5 @@ func (this *Database) Client() *Client {
 }
 
 func (this *Database) Collection(name string) Collection {
-	return &collection{Collection: this.Database.Collection(name), database: this}
+	return &collection{collection: this.Database.Collection(name), database: this}
 }

@@ -8,7 +8,14 @@ import (
 )
 
 type Collection interface {
+	Collection() *mongo.Collection
+
 	Name() string
+
+	Drop(ctx context.Context) error
+
+	// Clone
+	// Indexes
 
 	Database() *Database
 
@@ -37,15 +44,25 @@ type Collection interface {
 	DeleteMany(ctx context.Context, filter interface{}) (*DeleteResult, error)
 
 	Find(ctx context.Context, filter interface{}) Query
+
+	//Aggregate
 }
 
 type collection struct {
-	*mongo.Collection
-	database *Database
+	collection *mongo.Collection
+	database   *Database
+}
+
+func (this *collection) Collection() *mongo.Collection {
+	return this.collection
 }
 
 func (this *collection) Name() string {
-	return this.Collection.Name()
+	return this.collection.Name()
+}
+
+func (this *collection) Drop(ctx context.Context) error {
+	return this.collection.Drop(ctx)
 }
 
 func (this *collection) Database() *Database {
@@ -54,68 +71,68 @@ func (this *collection) Database() *Database {
 
 func (this *collection) InsertOne(ctx context.Context, document interface{}) (*InsertOneResult, error) {
 	var opts = options.InsertOne()
-	return this.Collection.InsertOne(ctx, document, opts)
+	return this.collection.InsertOne(ctx, document, opts)
 }
 
 func (this *collection) InsertMany(ctx context.Context, documents []interface{}) (*InsertManyResult, error) {
 	var opts = options.InsertMany()
-	return this.Collection.InsertMany(ctx, documents, opts)
+	return this.collection.InsertMany(ctx, documents, opts)
 }
 
 func (this *collection) Insert(ctx context.Context, documents ...interface{}) (*InsertManyResult, error) {
 	var opts = options.InsertMany()
-	return this.Collection.InsertMany(ctx, documents, opts)
+	return this.collection.InsertMany(ctx, documents, opts)
 }
 
 func (this *collection) ReplaceOne(ctx context.Context, filter interface{}, document interface{}) (*UpdateResult, error) {
 	var opts = options.Replace()
-	return this.Collection.ReplaceOne(ctx, filter, document, opts)
+	return this.collection.ReplaceOne(ctx, filter, document, opts)
 }
 
 func (this *collection) Upsert(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error) {
 	var opts = options.Replace().SetUpsert(true)
-	return this.Collection.ReplaceOne(ctx, filter, update, opts)
+	return this.collection.ReplaceOne(ctx, filter, update, opts)
 }
 
 func (this *collection) UpsertId(ctx context.Context, id interface{}, update interface{}) (*UpdateResult, error) {
 	var opts = options.Replace().SetUpsert(true)
-	return this.Collection.ReplaceOne(ctx, bson.M{"_id": id}, update, opts)
+	return this.collection.ReplaceOne(ctx, bson.M{"_id": id}, update, opts)
 }
 
 func (this *collection) UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error) {
 	var opts = options.Update()
-	return this.Collection.UpdateOne(ctx, filter, update, opts)
+	return this.collection.UpdateOne(ctx, filter, update, opts)
 }
 
 func (this *collection) UpdateId(ctx context.Context, id interface{}, update interface{}) (*UpdateResult, error) {
 	var opts = options.Update()
-	return this.Collection.UpdateByID(ctx, id, update, opts)
+	return this.collection.UpdateByID(ctx, id, update, opts)
 }
 
 func (this *collection) UpdateMany(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error) {
 	var opts = options.Update()
-	return this.Collection.UpdateMany(ctx, filter, update, opts)
+	return this.collection.UpdateMany(ctx, filter, update, opts)
 }
 
 func (this *collection) DeleteOne(ctx context.Context, filter interface{}) (*DeleteResult, error) {
 	var opts = options.Delete()
-	return this.Collection.DeleteOne(ctx, filter, opts)
+	return this.collection.DeleteOne(ctx, filter, opts)
 }
 
 func (this *collection) DeleteId(ctx context.Context, id interface{}) (*DeleteResult, error) {
 	var opts = options.Delete()
-	return this.Collection.DeleteOne(ctx, bson.M{"_id": id}, opts)
+	return this.collection.DeleteOne(ctx, bson.M{"_id": id}, opts)
 }
 
 func (this *collection) DeleteMany(ctx context.Context, filter interface{}) (*DeleteResult, error) {
 	var opts = options.Delete()
-	return this.Collection.DeleteMany(ctx, filter, opts)
+	return this.collection.DeleteMany(ctx, filter, opts)
 }
 
 func (this *collection) Find(ctx context.Context, filter interface{}) Query {
 	var q = &query{}
 	q.ctx = ctx
-	q.collection = this.Collection
+	q.collection = this.collection
 	q.filter = filter
 	return q
 }
