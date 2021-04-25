@@ -9,11 +9,12 @@ import (
 )
 
 type Query interface {
-	Sort(fields ...string) Query
 	Select(selector interface{}) Query
-	Skip(n int64) Query
-	Limit(n int64) Query
+	Sort(fields ...string) Query
 	Hint(hint interface{}) Query
+	Limit(n int64) Query
+	Skip(n int64) Query
+	BatchSize(n int32) Query
 
 	One(result interface{}) error
 	All(result interface{}) error
@@ -24,14 +25,20 @@ type Query interface {
 
 type query struct {
 	filter  interface{}
-	sort    interface{}
 	project interface{}
+	sort    interface{}
 	hint    interface{}
 	limit   *int64
 	skip    *int64
+	batch   *int32
 
 	ctx        context.Context
 	collection *mongo.Collection
+}
+
+func (this *query) Select(projection interface{}) Query {
+	this.project = projection
+	return this
 }
 
 func (this *query) Sort(fields ...string) Query {
@@ -71,13 +78,8 @@ func (this *query) Sort(fields ...string) Query {
 	return this
 }
 
-func (this *query) Select(projection interface{}) Query {
-	this.project = projection
-	return this
-}
-
-func (this *query) Skip(n int64) Query {
-	this.skip = &n
+func (this *query) Hint(hint interface{}) Query {
+	this.hint = hint
 	return this
 }
 
@@ -86,25 +88,29 @@ func (this *query) Limit(n int64) Query {
 	return this
 }
 
-func (this *query) Hint(hint interface{}) Query {
-	this.hint = hint
+func (this *query) Skip(n int64) Query {
+	this.skip = &n
+	return this
+}
+
+func (this *query) BatchSize(n int32) Query {
+	this.batch = &n
 	return this
 }
 
 func (this *query) One(result interface{}) error {
 	var opts = options.FindOne()
-
-	if this.sort != nil {
-		opts.SetSort(this.sort)
-	}
 	if this.project != nil {
 		opts.SetProjection(this.project)
 	}
-	if this.skip != nil {
-		opts.SetSkip(*this.skip)
+	if this.sort != nil {
+		opts.SetSort(this.sort)
 	}
 	if this.hint != nil {
 		opts.SetHint(this.hint)
+	}
+	if this.skip != nil {
+		opts.SetSkip(*this.skip)
 	}
 	return this.collection.FindOne(this.ctx, this.filter, opts).Decode(result)
 }
@@ -129,11 +135,14 @@ func (this *query) Count() (n int64, err error) {
 func (this *query) Cursor() Cursor {
 	var opts = options.Find()
 
+	if this.project != nil {
+		opts.SetProjection(this.project)
+	}
 	if this.sort != nil {
 		opts.SetSort(this.sort)
 	}
-	if this.project != nil {
-		opts.SetProjection(this.project)
+	if this.hint != nil {
+		opts.SetHint(this.hint)
 	}
 	if this.limit != nil {
 		opts.SetLimit(*this.limit)
@@ -141,8 +150,8 @@ func (this *query) Cursor() Cursor {
 	if this.skip != nil {
 		opts.SetSkip(*this.skip)
 	}
-	if this.hint != nil {
-		opts.SetHint(this.hint)
+	if this.batch != nil {
+		opts.SetBatchSize(*this.batch)
 	}
 
 	var cur, err = this.collection.Find(this.ctx, this.filter, opts)
