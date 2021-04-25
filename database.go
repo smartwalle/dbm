@@ -11,6 +11,6 @@ func (this *Database) Client() *Client {
 	return this.client
 }
 
-func (this *Database) Collection(name string) *Collection {
-	return &Collection{Collection: this.Database.Collection(name), database: this}
+func (this *Database) Collection(name string) Collection {
+	return &collection{Collection: this.Database.Collection(name), database: this}
 }
