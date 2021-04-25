@@ -48,7 +48,7 @@ func (this *query) Sort(fields ...string) Query {
 
 	var sorts bson.D
 	for _, field := range fields {
-		n := 1
+		var sort = int32(1)
 		var kind string
 		if field != "" {
 			if field[0] == '$' {
@@ -57,13 +57,14 @@ func (this *query) Sort(fields ...string) Query {
 					field = field[c+1:]
 				}
 			}
-			switch field[0] {
-			case '+':
-				field = field[1:]
-			case '-':
-				n = -1
-				field = field[1:]
-			}
+			//switch field[0] {
+			//case '+':
+			//	field = field[1:]
+			//case '-':
+			//	sort = -1
+			//	field = field[1:]
+			//}
+			field, sort = SortField(field)
 		}
 		if field == "" {
 			continue
@@ -71,11 +72,28 @@ func (this *query) Sort(fields ...string) Query {
 		if kind == "textScore" {
 			sorts = append(sorts, bson.E{Key: field, Value: bson.M{"$meta": kind}})
 		} else {
-			sorts = append(sorts, bson.E{Key: field, Value: n})
+			sorts = append(sorts, bson.E{Key: field, Value: sort})
 		}
 	}
 	this.sort = sorts
 	return this
+}
+
+func SortField(field string) (key string, sort int32) {
+	sort = 1
+	key = field
+
+	if len(field) != 0 {
+		switch field[0] {
+		case '+':
+			sort = 1
+			key = field[1:]
+		case '-':
+			sort = -1
+			key = field[1:]
+		}
+	}
+	return key, sort
 }
 
 func (this *query) Hint(hint interface{}) Query {

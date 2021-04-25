@@ -39,8 +39,10 @@ func main() {
 	fmt.Println(u1)
 
 	var uList []*User
-	tUser.Find(context.Background(), dbm.M{}).All(&uList)
-	fmt.Println(uList)
+	tUser.Find(context.Background(), dbm.M{}).Sort("age").All(&uList)
+	for _, u := range uList {
+		fmt.Println(u.Name, u.Age)
+	}
 
 	var cursor = tUser.Find(context.Background(), dbm.M{}).Cursor()
 	defer cursor.Close()
