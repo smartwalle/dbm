@@ -66,7 +66,7 @@ func (this *query) Sort(fields ...string) Query {
 			}
 		}
 		if field == "" {
-			panic("Sort: empty field name")
+			continue
 		}
 		if kind == "textScore" {
 			sorts = append(sorts, bson.E{Key: field, Value: bson.M{"$meta": kind}})
