@@ -14,8 +14,8 @@ type User struct {
 }
 
 func main() {
-	//var cfg = dbm.NewConfig("mongodb+srv://smartwalle:smartwalle@smartwalle.kbxxd.mongodb.net/?retryWrites=true&w=majority")
-	var cfg = dbm.NewConfig("mongodb://192.168.1.77:27017")
+	var cfg = dbm.NewConfig("mongodb+srv://smartwalle:smartwalle@smartwalle.kbxxd.mongodb.net/?retryWrites=true&w=majority")
+	//var cfg = dbm.NewConfig("mongodb://192.168.1.77:27017")
 
 	var client, err = dbm.NewClient(context.Background(), cfg)
 	if err != nil {

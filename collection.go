@@ -44,7 +44,7 @@ type Collection interface {
 
 	Find(ctx context.Context, filter interface{}) Query
 
-	//Aggregate
+	Aggregate(ctx context.Context, pipeline interface{}) Aggregate
 
 	IndexView() IndexView
 }
@@ -144,6 +144,14 @@ func (this *collection) Find(ctx context.Context, filter interface{}) Query {
 	q.collection = this.collection
 	q.filter = filter
 	return q
+}
+
+func (this *collection) Aggregate(ctx context.Context, pipeline interface{}) Aggregate {
+	var a = &aggregate{}
+	a.ctx = ctx
+	a.collection = this.collection
+	a.pipeline = pipeline
+	return a
 }
 
 func (this *collection) IndexView() IndexView {
