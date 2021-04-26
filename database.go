@@ -16,9 +16,11 @@ type Database interface {
 
 	Collection(name string) Collection
 
-	UseSession(ctx context.Context, fn func(sCtx SessionContext) error) error
+	WithTransaction(ctx context.Context, fn func(sCtx context.Context) (interface{}, error), opts ...*TransactionOptions) (interface{}, error)
 
-	StartSession(ctx context.Context) (SessionContext, error)
+	UseSession(ctx context.Context, fn func(sess Session) error) error
+
+	StartSession(ctx context.Context) (Session, error)
 }
 
 type database struct {
@@ -46,10 +48,14 @@ func (this *database) Collection(name string) Collection {
 	return &collection{collection: this.database.Collection(name), database: this}
 }
 
-func (this *database) UseSession(ctx context.Context, fn func(sCtx SessionContext) error) error {
+func (this *database) WithTransaction(ctx context.Context, fn func(sCtx context.Context) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
+	return this.client.WithTransaction(ctx, fn, opts...)
+}
+
+func (this *database) UseSession(ctx context.Context, fn func(sess Session) error) error {
 	return this.client.UseSession(ctx, fn)
 }
 
-func (this *database) StartSession(ctx context.Context) (SessionContext, error) {
+func (this *database) StartSession(ctx context.Context) (Session, error) {
 	return this.client.StartSession(ctx)
 }

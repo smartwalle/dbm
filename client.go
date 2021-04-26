@@ -157,14 +157,75 @@ func (this *Client) Database(name string) *database {
 	return &database{database: this.client.Database(name), client: this}
 }
 
-func (this *Client) UseSession(ctx context.Context, fn func(sCtx SessionContext) error) error {
+// WithTransaction
+// var client, _ = dbm.NewClient(...)
+// var db = client.Database("xx")
+// var c1 = db.Collection("c1")
+// var c2 = db.Collection("c2")
+// db.WithTransaction(context.Background(), func(sCtx context.Context) (interface{}, error) {
+//		if _, sErr := c1.Insert(sCtx, ...); sErr != nil {
+//			return nil, sErr
+//		}
+//		if _, sErr := c2.Insert(sCtx, ...); sErr != nil {
+//			return nil, sErr
+//		}
+//		return nil, nil
+// }
+func (this *Client) WithTransaction(ctx context.Context, fn func(sCtx context.Context) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
+	var sess, err = this.StartSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer sess.EndSession(ctx)
+	return sess.WithTransaction(ctx, fn, opts...)
+}
+
+// UseSession
+// var client, _ = dbm.NewClient(...)
+// var db = client.Database("xx")
+// var c1 = db.Collection("c1")
+// var c2 = db.Collection("c2")
+// db.UseSession(context.Background(), func(sess dbm.Session) error {
+// 		if sErr := sess.StartTransaction(); sErr != nil {
+//			return sErr
+//		}
+//		if _, sErr := c1.Insert(sess, ...); sErr != nil {
+//			return nil, sErr
+//		}
+//		if _, sErr := c2.Insert(sess, ...); sErr != nil {
+//			return nil, sErr
+//		}
+// 		return sess.CommitTransaction(context.Background())
+// })
+func (this *Client) UseSession(ctx context.Context, fn func(sess Session) error) error {
 	if this.transactionAllowed == false {
 		return ErrSessionNotSupported
 	}
-	return this.client.UseSession(ctx, fn)
+	return this.client.UseSession(ctx, func(sCtx SessionContext) error {
+		var s = &session{}
+		s.SessionContext = sCtx
+		return fn(s)
+	})
 }
 
-func (this *Client) StartSession(ctx context.Context) (SessionContext, error) {
+// StartSession
+// var client, _ = dbm.NewClient(...)
+// var db = client.Database("xx")
+// var c1 = db.Collection("c1")
+// var c2 = db.Collection("c2")
+// var sess, _ = db.StartSession(context.Background())
+// defer sess.EndSession(context.Background())
+// if sErr := sess.StartTransaction(); sErr != nil {
+// 		return
+// }
+// if _, sErr := c1.Insert(sess, ...); sErr != nil {
+// 		return sErr
+// }
+// if _, sErr := c2.Insert(sess, ...); sErr != nil {
+// 		return sErr
+// }
+// sess.CommitTransaction(context.Background())
+func (this *Client) StartSession(ctx context.Context) (Session, error) {
 	if this.transactionAllowed == false {
 		return nil, ErrSessionNotSupported
 	}
@@ -173,7 +234,7 @@ func (this *Client) StartSession(ctx context.Context) (SessionContext, error) {
 	if err != nil {
 		return nil, err
 	}
-	return mongo.NewSessionContext(ctx, sess), nil
+	return &session{SessionContext: mongo.NewSessionContext(ctx, sess)}, nil
 }
 
 func CompareServerVersions(v1 string, v2 string) int {
