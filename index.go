@@ -21,6 +21,8 @@ type IndexView interface {
 
 	CreateUniqueIndex(ctx context.Context, name string, keys []string) (string, error)
 
+	CreateTTLIndex(ctx context.Context, name string, keys []string, ttl int32) (string, error)
+
 	DropIndex(ctx context.Context, keys []string) error
 
 	Drop(ctx context.Context, name string) error
@@ -49,6 +51,13 @@ func (this *indexView) CreateUniqueIndex(ctx context.Context, name string, keys 
 	var opts = NewIndexOptions()
 	opts.SetName(name)
 	opts.SetUnique(true)
+	return this.Create(ctx, keys, opts)
+}
+
+func (this *indexView) CreateTTLIndex(ctx context.Context, name string, keys []string, ttl int32) (string, error) {
+	var opts = NewIndexOptions()
+	opts.SetName(name)
+	opts.SetExpireAfterSeconds(ttl)
 	return this.Create(ctx, keys, opts)
 }
 
