@@ -23,7 +23,7 @@ type IndexView interface {
 
 	DropIndex(ctx context.Context, keys []string) error
 
-	DropName(ctx context.Context, name string) error
+	Drop(ctx context.Context, name string) error
 
 	DropAll(ctx context.Context) error
 }
@@ -78,7 +78,7 @@ func (this *indexView) DropIndex(ctx context.Context, keys []string) error {
 	return err
 }
 
-func (this *indexView) DropName(ctx context.Context, name string) error {
+func (this *indexView) Drop(ctx context.Context, name string) error {
 	_, err := this.view.DropOne(ctx, name)
 	return err
 }
