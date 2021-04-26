@@ -153,7 +153,7 @@ func (this *Client) TransactionAllowed() bool {
 	return this.transactionAllowed
 }
 
-func (this *Client) Database(name string) *database {
+func (this *Client) Database(name string) Database {
 	return &database{database: this.client.Database(name), client: this}
 }
 
