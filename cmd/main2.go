@@ -13,89 +13,19 @@ type User struct {
 }
 
 func main() {
-	var cfg = dbm.NewConfig("mongodb://192.168.1.77:27017")
+	var cfg = dbm.NewConfig("mongodb+srv://smartwalle:smartwalle@smartwalle.kbxxd.mongodb.net/?retryWrites=true&w=majority")
 
 	var client, err = dbm.NewClient(context.Background(), cfg)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer client.Close()
+	defer client.Close(context.Background())
 
-	var db = client.Database("sm")
+	var db = client.Database("db")
 	var tUser = db.Collection("user")
 
-	_ = tUser
-
-	//var eee = client.UseSession(context.Background(), func(sCtx dbm.SessionContext) error {
-	//
-	//	sCtx.StartTransaction()
-	//	var u = &User{}
-	//	u.Id = dbm.NewObjectId()
-	//	u.Age = 10
-	//
-	//	var err error
-	//
-	//	defer func() {
-	//		if err != nil {
-	//			sCtx.AbortTransaction(sCtx)
-	//		} else {
-	//			sCtx.CommitTransaction(sCtx)
-	//		}
-	//	}()
-	//
-	//	if _, err = tUser.Insert(sCtx, u); err != nil {
-	//		fmt.Println("---")
-	//		return err
-	//	}
-	//
-	//	//u.Id = dbm.NewObjectId()
-	//
-	//	u.Age = 20
-	//
-	//	if _, err = tUser.Insert(sCtx, u); err != nil {
-	//		fmt.Println("===")
-	//		return err
-	//	}
-	//
-	//	return nil
-	//})
-	//fmt.Println(eee)
-
-	//fmt.Println(client.ServerVersion())
-	//fmt.Println(client.TransactionAllowed())
-
-	//var u1 = &User{Id: dbm.NewObjectId(), Name: "user1", Age: 10}
-	//var u2 = &User{Id: dbm.NewObjectId(), Name: "user2", Age: 20}
-	//var u3 = &User{Id: dbm.NewObjectId(), Name: "user3", Age: 30}
-	//
-	//user.Insert(context.Background(), u1, u2, u3)
-
-	//var u1 *User
-	//tUser.Find(context.Background(), dbm.M{"age": 20}).One(&u1)
-	//fmt.Println(u1)
-	//
-	//var uList []*User
-	//tUser.Find(context.Background(), dbm.M{}).Sort("age").All(&uList)
-	//for _, u := range uList {
-	//	fmt.Println(u.Name, u.Age)
-	//}
-	//
-	//var cursor = tUser.Find(context.Background(), dbm.M{}).Cursor()
-	//defer cursor.Close()
-	//for {
-	//	ok := cursor.Next(context.Background())
-	//
-	//	if ok == false {
-	//		break
-	//	}
-	//
-	//	var u *User
-	//	err = cursor.One(context.Background(), &u)
-	//
-	//	fmt.Println(err, ok, u)
-	//	if err != nil {
-	//		break
-	//	}
-	//}
+	var uList []*User
+	tUser.Find(context.Background(), dbm.M{}).All(&uList)
+	fmt.Println(uList)
 }

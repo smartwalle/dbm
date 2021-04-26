@@ -18,7 +18,7 @@ type Cursor interface {
 
 	RemainingBatchLength() int
 
-	Close() error
+	Close(ctx context.Context) error
 
 	Error() error
 }
@@ -70,11 +70,11 @@ func (this *cursor) RemainingBatchLength() int {
 	return this.Cursor.RemainingBatchLength()
 }
 
-func (this *cursor) Close() error {
+func (this *cursor) Close(ctx context.Context) error {
 	if this.err != nil {
 		return this.err
 	}
-	return this.Cursor.Close(context.Background())
+	return this.Cursor.Close(ctx)
 }
 
 func (this *cursor) Error() error {

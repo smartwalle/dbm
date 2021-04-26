@@ -135,6 +135,7 @@ func (this *query) One(result interface{}) error {
 
 func (this *query) All(result interface{}) error {
 	var cur = this.Cursor()
+	defer cur.Close(this.ctx)
 	return cur.All(this.ctx, result)
 }
 
