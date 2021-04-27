@@ -6,7 +6,7 @@ import (
 )
 
 type Database interface {
-	Client() *Client
+	Client() Client
 
 	Database() *mongo.Database
 
@@ -25,10 +25,10 @@ type Database interface {
 
 type database struct {
 	database *mongo.Database
-	client   *Client
+	client   Client
 }
 
-func (this *database) Client() *Client {
+func (this *database) Client() Client {
 	return this.client
 }
 

@@ -16,7 +16,29 @@ import (
 	"time"
 )
 
-type Client struct {
+type Client interface {
+	Client() *mongo.Client
+
+	Close(ctx context.Context) error
+
+	Ping(ctx context.Context) error
+
+	ServerStatus(ctx context.Context) (bson.Raw, error)
+
+	ServerVersion() string
+
+	TransactionAllowed() bool
+
+	Database(name string) Database
+
+	WithTransaction(ctx context.Context, fn func(sCtx context.Context) (interface{}, error), opts ...*TransactionOptions) (interface{}, error)
+
+	UseSession(ctx context.Context, fn func(sess Session) error) error
+
+	StartSession(ctx context.Context) (Session, error)
+}
+
+type client struct {
 	*info
 	cfg    *Config
 	topo   *topology.Topology
@@ -28,27 +50,27 @@ type info struct {
 	transactionAllowed bool
 }
 
-func NewClient(ctx context.Context, cfg *Config) (*Client, error) {
+func NewClient(ctx context.Context, cfg *Config) (Client, error) {
 	var topo, err = connectTopology(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	client, err := connect(ctx, cfg.ClientOptions)
+	mClient, err := connect(ctx, cfg.ClientOptions)
 	if err != nil {
 		return nil, err
 	}
 
-	sInfo, err := load(ctx, topo, client)
+	sInfo, err := load(ctx, topo, mClient)
 	if err != nil {
 		return nil, err
 	}
 
-	var nClient = &Client{}
+	var nClient = &client{}
 	nClient.info = sInfo
 	nClient.cfg = cfg
 	nClient.topo = topo
-	nClient.client = client
+	nClient.client = mClient
 	return nClient, nil
 }
 
@@ -124,31 +146,31 @@ func serverStatus(ctx context.Context, client *mongo.Client) (bson.Raw, error) {
 	return status, nil
 }
 
-func (this *Client) Client() *mongo.Client {
+func (this *client) Client() *mongo.Client {
 	return this.client
 }
 
-func (this *Client) Close(ctx context.Context) error {
+func (this *client) Close(ctx context.Context) error {
 	return this.client.Disconnect(ctx)
 }
 
-func (this *Client) Ping(ctx context.Context) error {
+func (this *client) Ping(ctx context.Context) error {
 	return this.client.Ping(ctx, readpref.Primary())
 }
 
-func (this *Client) ServerStatus(ctx context.Context) (bson.Raw, error) {
+func (this *client) ServerStatus(ctx context.Context) (bson.Raw, error) {
 	return serverStatus(ctx, this.client)
 }
 
-func (this *Client) ServerVersion() string {
+func (this *client) ServerVersion() string {
 	return this.version
 }
 
-func (this *Client) TransactionAllowed() bool {
+func (this *client) TransactionAllowed() bool {
 	return this.transactionAllowed
 }
 
-func (this *Client) Database(name string) Database {
+func (this *client) Database(name string) Database {
 	return &database{database: this.client.Database(name), client: this}
 }
 
@@ -166,7 +188,7 @@ func (this *Client) Database(name string) Database {
 //		}
 //		return nil, nil
 // }
-func (this *Client) WithTransaction(ctx context.Context, fn func(sCtx context.Context) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
+func (this *client) WithTransaction(ctx context.Context, fn func(sCtx context.Context) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
 	var sess, err = this.StartSession(ctx)
 	if err != nil {
 		return nil, err
@@ -192,7 +214,7 @@ func (this *Client) WithTransaction(ctx context.Context, fn func(sCtx context.Co
 //		}
 // 		return sess.CommitTransaction(context.Background())
 // })
-func (this *Client) UseSession(ctx context.Context, fn func(sess Session) error) error {
+func (this *client) UseSession(ctx context.Context, fn func(sess Session) error) error {
 	if this.transactionAllowed == false {
 		return ErrSessionNotSupported
 	}
@@ -220,7 +242,7 @@ func (this *Client) UseSession(ctx context.Context, fn func(sess Session) error)
 // 		return sErr
 // }
 // sess.CommitTransaction(context.Background())
-func (this *Client) StartSession(ctx context.Context) (Session, error) {
+func (this *client) StartSession(ctx context.Context) (Session, error) {
 	if this.transactionAllowed == false {
 		return nil, ErrSessionNotSupported
 	}
