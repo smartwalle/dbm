@@ -2,7 +2,6 @@ package dbm
 
 import (
 	"context"
-	"errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/description"
@@ -15,10 +14,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-)
-
-var (
-	ErrSessionNotSupported = errors.New("session not supported")
 )
 
 type Client struct {

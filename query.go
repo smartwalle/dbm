@@ -11,6 +11,15 @@ import (
 
 type Collation = options.Collation
 
+type ArrayFilters = options.ArrayFilters
+
+type ReturnDocument = options.ReturnDocument
+
+const (
+	Before = options.Before
+	After  = options.After
+)
+
 type Query interface {
 	BatchSize(n int32) Query
 
@@ -165,7 +174,11 @@ func (this *query) Sort(fields ...string) Query {
 	if len(fields) == 0 {
 		return this
 	}
+	this.sort = sortFields(fields...)
+	return this
+}
 
+func sortFields(fields ...string) bson.D {
 	var sorts bson.D
 	for _, field := range fields {
 		var sort = int32(1)
@@ -184,7 +197,7 @@ func (this *query) Sort(fields ...string) Query {
 			//	sort = -1
 			//	field = field[1:]
 			//}
-			field, sort = SortField(field)
+			field, sort = sortField(field)
 		}
 		if field == "" {
 			continue
@@ -195,11 +208,10 @@ func (this *query) Sort(fields ...string) Query {
 			sorts = append(sorts, bson.E{Key: field, Value: sort})
 		}
 	}
-	this.sort = sorts
-	return this
+	return sorts
 }
 
-func SortField(field string) (key string, sort int32) {
+func sortField(field string) (key string, sort int32) {
 	sort = 1
 	key = field
 
@@ -344,4 +356,220 @@ func (this *query) Cursor() Cursor {
 
 	var cur, err = this.collection.Find(this.ctx, this.filter, opts)
 	return &cursor{Cursor: cur, err: err}
+}
+
+type FindUpdate interface {
+	ArrayFilters(filters ArrayFilters) FindUpdate
+
+	BypassDocumentValidation(b bool) FindUpdate
+
+	Collation(c *Collation) FindUpdate
+
+	MaxTime(d time.Duration) FindUpdate
+
+	Projection(projection interface{}) FindUpdate
+
+	ReturnDocument(rd ReturnDocument) FindUpdate
+
+	Sort(fields ...string) FindUpdate
+
+	Upsert(b bool) FindUpdate
+
+	Hint(hint interface{}) FindUpdate
+
+	Apply(result interface{}) error
+}
+
+type findUpdate struct {
+	filter interface{}
+	update interface{}
+
+	ctx        context.Context
+	opts       *options.FindOneAndUpdateOptions
+	collection *mongo.Collection
+}
+
+func (this *findUpdate) ArrayFilters(filters ArrayFilters) FindUpdate {
+	this.opts.SetArrayFilters(filters)
+	return this
+}
+
+func (this *findUpdate) BypassDocumentValidation(b bool) FindUpdate {
+	this.opts.SetBypassDocumentValidation(b)
+	return this
+}
+
+func (this *findUpdate) Collation(c *Collation) FindUpdate {
+	this.opts.SetCollation(c)
+	return this
+}
+
+func (this *findUpdate) MaxTime(d time.Duration) FindUpdate {
+	this.opts.SetMaxTime(d)
+	return this
+}
+
+func (this *findUpdate) Projection(projection interface{}) FindUpdate {
+	this.opts.SetProjection(projection)
+	return this
+}
+
+func (this *findUpdate) ReturnDocument(rd ReturnDocument) FindUpdate {
+	this.opts.SetReturnDocument(rd)
+	return this
+}
+
+func (this *findUpdate) Sort(fields ...string) FindUpdate {
+	if len(fields) == 0 {
+		return this
+	}
+	this.opts.SetSort(sortFields(fields...))
+	return this
+}
+
+func (this *findUpdate) Upsert(b bool) FindUpdate {
+	this.opts.SetUpsert(b)
+	return this
+}
+
+func (this *findUpdate) Hint(hint interface{}) FindUpdate {
+	this.opts.SetHint(hint)
+	return this
+}
+
+func (this *findUpdate) Apply(result interface{}) error {
+	var err = this.collection.FindOneAndUpdate(this.ctx, this.filter, this.update, this.opts).Decode(result)
+	return err
+}
+
+type FindReplace interface {
+	BypassDocumentValidation(b bool) FindReplace
+
+	Collation(c *Collation) FindReplace
+
+	MaxTime(d time.Duration) FindReplace
+
+	Projection(projection interface{}) FindReplace
+
+	ReturnDocument(rd ReturnDocument) FindReplace
+
+	Sort(fields ...string) FindReplace
+
+	Upsert(b bool) FindReplace
+
+	Hint(hint interface{}) FindReplace
+
+	Apply(result interface{}) error
+}
+
+type findReplace struct {
+	filter      interface{}
+	replacement interface{}
+
+	ctx        context.Context
+	opts       *options.FindOneAndReplaceOptions
+	collection *mongo.Collection
+}
+
+func (this *findReplace) BypassDocumentValidation(b bool) FindReplace {
+	this.opts.SetBypassDocumentValidation(b)
+	return this
+}
+
+func (this *findReplace) Collation(c *Collation) FindReplace {
+	this.opts.SetCollation(c)
+	return this
+}
+
+func (this *findReplace) MaxTime(d time.Duration) FindReplace {
+	this.opts.SetMaxTime(d)
+	return this
+}
+
+func (this *findReplace) Projection(projection interface{}) FindReplace {
+	this.opts.SetProjection(projection)
+	return this
+}
+
+func (this *findReplace) ReturnDocument(rd ReturnDocument) FindReplace {
+	this.opts.SetReturnDocument(rd)
+	return this
+}
+
+func (this *findReplace) Sort(fields ...string) FindReplace {
+	if len(fields) == 0 {
+		return this
+	}
+	this.opts.SetSort(sortFields(fields...))
+	return this
+}
+
+func (this *findReplace) Upsert(b bool) FindReplace {
+	this.opts.SetUpsert(b)
+	return this
+}
+
+func (this *findReplace) Hint(hint interface{}) FindReplace {
+	this.opts.SetHint(hint)
+	return this
+}
+
+func (this *findReplace) Apply(result interface{}) error {
+	var err = this.collection.FindOneAndReplace(this.ctx, this.filter, this.replacement, this.opts).Decode(result)
+	return err
+}
+
+type FindDelete interface {
+	Collation(c *Collation) FindDelete
+
+	MaxTime(d time.Duration) FindDelete
+
+	Projection(projection interface{}) FindDelete
+
+	Sort(fields ...string) FindDelete
+
+	Hint(hint interface{}) FindDelete
+
+	Apply(result interface{}) error
+}
+
+type findDelete struct {
+	filter interface{}
+
+	ctx        context.Context
+	opts       *options.FindOneAndDeleteOptions
+	collection *mongo.Collection
+}
+
+func (this *findDelete) Collation(c *Collation) FindDelete {
+	this.opts.SetCollation(c)
+	return this
+}
+
+func (this *findDelete) MaxTime(d time.Duration) FindDelete {
+	this.opts.SetMaxTime(d)
+	return this
+}
+
+func (this *findDelete) Projection(projection interface{}) FindDelete {
+	this.opts.SetProjection(projection)
+	return this
+}
+
+func (this *findDelete) Sort(fields ...string) FindDelete {
+	if len(fields) == 0 {
+		return this
+	}
+	this.opts.SetSort(sortFields(fields...))
+	return this
+}
+
+func (this *findDelete) Hint(hint interface{}) FindDelete {
+	this.opts.SetHint(hint)
+	return this
+}
+
+func (this *findDelete) Apply(result interface{}) error {
+	var err = this.collection.FindOneAndDelete(this.ctx, this.filter, this.opts).Decode(result)
+	return err
 }

@@ -65,7 +65,7 @@ func parseIndexKey(keys []string) bson.D {
 	var doc bson.D
 	for _, field := range keys {
 		var sort = int32(1)
-		field, sort = SortField(field)
+		field, sort = sortField(field)
 		doc = append(doc, bson.E{field, sort})
 	}
 	return doc
@@ -74,7 +74,7 @@ func parseIndexKey(keys []string) bson.D {
 func (this *indexView) DropIndex(ctx context.Context, keys []string) error {
 	var name string
 	for _, key := range keys {
-		field, sort := SortField(key)
+		field, sort := sortField(key)
 		field = field + "_" + fmt.Sprint(sort)
 
 		if name == "" {

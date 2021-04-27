@@ -44,6 +44,8 @@ type Collection interface {
 
 	Find(ctx context.Context, filter interface{}) Query
 
+	FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}) FindUpdate
+
 	Aggregate(ctx context.Context, pipeline interface{}) Aggregate
 
 	IndexView() IndexView
@@ -143,6 +145,35 @@ func (this *collection) Find(ctx context.Context, filter interface{}) Query {
 	q.ctx = ctx
 	q.collection = this.collection
 	q.filter = filter
+	return q
+}
+
+func (this *collection) FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}) FindUpdate {
+	var q = &findUpdate{}
+	q.filter = filter
+	q.update = update
+	q.ctx = ctx
+	q.opts = options.FindOneAndUpdate()
+	q.collection = this.collection
+	return q
+}
+
+func (this *collection) FindOneAndReplace(ctx context.Context, filter interface{}, replacement interface{}) FindReplace {
+	var q = &findReplace{}
+	q.filter = filter
+	q.replacement = replacement
+	q.ctx = ctx
+	q.opts = options.FindOneAndReplace()
+	q.collection = this.collection
+	return q
+}
+
+func (this *collection) FindOneAndDelete(ctx context.Context, filter interface{}) FindDelete {
+	var q = &findDelete{}
+	q.filter = filter
+	q.ctx = ctx
+	q.opts = options.FindOneAndDelete()
+	q.collection = this.collection
 	return q
 }
 
