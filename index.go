@@ -15,6 +15,8 @@ func NewIndexOptions() *IndexOptions {
 }
 
 type IndexView interface {
+	IndexView() mongo.IndexView
+
 	Create(ctx context.Context, keys []string, opts *IndexOptions) (string, error)
 
 	CreateIndex(ctx context.Context, name string, keys []string) (string, error)
@@ -32,6 +34,10 @@ type IndexView interface {
 
 type indexView struct {
 	view mongo.IndexView
+}
+
+func (this *indexView) IndexView() mongo.IndexView {
+	return this.view
 }
 
 func (this *indexView) Create(ctx context.Context, keys []string, opts *IndexOptions) (string, error) {
