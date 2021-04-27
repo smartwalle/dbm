@@ -40,4 +40,12 @@ type M = primitive.M
 
 type A = primitive.A
 
+type DateTime = primitive.DateTime
+
+type Timestamp = primitive.Timestamp
+
+type Null = primitive.Null
+
+type Regex = primitive.Regex
+
 type Pipeline = mongo.Pipeline
