@@ -8,45 +8,67 @@ import (
 )
 
 type Aggregate interface {
-	Hint(hint interface{}) Aggregate
-	BatchSize(n int32) Aggregate
 	AllowDiskUse(b bool) Aggregate
-	MaxTime(time.Duration) Aggregate
+
+	BatchSize(n int32) Aggregate
+
+	BypassDocumentValidation(b bool) Aggregate
+
+	MaxTime(d time.Duration) Aggregate
+
+	MaxAwaitTime(d time.Duration) Aggregate
+
+	Comment(s string) Aggregate
+
+	Hint(hint interface{}) Aggregate
 
 	One(result interface{}) error
+
 	All(result interface{}) error
 
 	Cursor() Cursor
 }
 
 type aggregate struct {
-	pipeline     interface{}
-	hint         interface{}
-	batch        *int32
-	allowDiskUse *bool
-	maxTime      *time.Duration
+	pipeline interface{}
 
 	ctx        context.Context
+	opts       *options.AggregateOptions
 	collection *mongo.Collection
 }
 
-func (this *aggregate) Hint(hint interface{}) Aggregate {
-	this.hint = hint
+func (this *aggregate) AllowDiskUse(b bool) Aggregate {
+	this.opts.SetAllowDiskUse(b)
 	return this
 }
 
 func (this *aggregate) BatchSize(n int32) Aggregate {
-	this.batch = &n
+	this.opts.SetBatchSize(n)
 	return this
 }
 
-func (this *aggregate) AllowDiskUse(b bool) Aggregate {
-	this.allowDiskUse = &b
+func (this *aggregate) BypassDocumentValidation(b bool) Aggregate {
+	this.opts.SetBypassDocumentValidation(b)
 	return this
 }
 
-func (this *aggregate) MaxTime(maxTime time.Duration) Aggregate {
-	this.maxTime = &maxTime
+func (this *aggregate) MaxTime(d time.Duration) Aggregate {
+	this.opts.SetMaxTime(d)
+	return this
+}
+
+func (this *aggregate) MaxAwaitTime(d time.Duration) Aggregate {
+	this.opts.SetMaxAwaitTime(d)
+	return this
+}
+
+func (this *aggregate) Comment(s string) Aggregate {
+	this.opts.SetComment(s)
+	return this
+}
+
+func (this *aggregate) Hint(hint interface{}) Aggregate {
+	this.opts.SetHint(hint)
 	return this
 }
 
@@ -66,21 +88,6 @@ func (this *aggregate) All(result interface{}) error {
 }
 
 func (this *aggregate) Cursor() Cursor {
-	var opts = options.Aggregate()
-
-	if this.hint != nil {
-		opts.SetHint(this.hint)
-	}
-	if this.batch != nil {
-		opts.SetBatchSize(*this.batch)
-	}
-	if this.allowDiskUse != nil {
-		opts.SetAllowDiskUse(*this.allowDiskUse)
-	}
-	if this.maxTime != nil {
-		opts.SetMaxTime(*this.maxTime)
-	}
-
-	var cur, err = this.collection.Aggregate(this.ctx, this.pipeline, opts)
+	var cur, err = this.collection.Aggregate(this.ctx, this.pipeline, this.opts)
 	return &cursor{Cursor: cur, err: err}
 }

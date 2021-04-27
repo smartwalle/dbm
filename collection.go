@@ -148,9 +148,10 @@ func (this *collection) Find(ctx context.Context, filter interface{}) Query {
 
 func (this *collection) Aggregate(ctx context.Context, pipeline interface{}) Aggregate {
 	var a = &aggregate{}
-	a.ctx = ctx
-	a.collection = this.collection
 	a.pipeline = pipeline
+	a.ctx = ctx
+	a.opts = options.Aggregate()
+	a.collection = this.collection
 	return a
 }
 
