@@ -46,6 +46,9 @@ type Collection interface {
 
 	FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}) FindUpdate
 
+	// TODO Distinct
+	// TODO BulkWrite
+
 	Aggregate(ctx context.Context, pipeline interface{}) Aggregate
 
 	IndexView() IndexView
