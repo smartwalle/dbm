@@ -14,13 +14,15 @@ type Aggregate interface {
 
 	BypassDocumentValidation(b bool) Aggregate
 
-	MaxTime(d time.Duration) Aggregate
-
-	MaxAwaitTime(d time.Duration) Aggregate
+	Collation(c *Collation) Aggregate
 
 	Comment(s string) Aggregate
 
 	Hint(hint interface{}) Aggregate
+
+	MaxTime(d time.Duration) Aggregate
+
+	MaxAwaitTime(d time.Duration) Aggregate
 
 	One(result interface{}) error
 
@@ -52,13 +54,8 @@ func (this *aggregate) BypassDocumentValidation(b bool) Aggregate {
 	return this
 }
 
-func (this *aggregate) MaxTime(d time.Duration) Aggregate {
-	this.opts.SetMaxTime(d)
-	return this
-}
-
-func (this *aggregate) MaxAwaitTime(d time.Duration) Aggregate {
-	this.opts.SetMaxAwaitTime(d)
+func (this *aggregate) Collation(c *Collation) Aggregate {
+	this.opts.SetCollation(c)
 	return this
 }
 
@@ -69,6 +66,16 @@ func (this *aggregate) Comment(s string) Aggregate {
 
 func (this *aggregate) Hint(hint interface{}) Aggregate {
 	this.opts.SetHint(hint)
+	return this
+}
+
+func (this *aggregate) MaxTime(d time.Duration) Aggregate {
+	this.opts.SetMaxTime(d)
+	return this
+}
+
+func (this *aggregate) MaxAwaitTime(d time.Duration) Aggregate {
+	this.opts.SetMaxAwaitTime(d)
 	return this
 }
 
