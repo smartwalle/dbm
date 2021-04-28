@@ -6,26 +6,28 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type SessionContext = mongo.SessionContext
-
 type TransactionOptions = options.TransactionOptions
 
 func Transaction() *TransactionOptions {
 	return options.Transaction()
 }
 
-type Session interface {
+type SessionContext interface {
 	context.Context
+
+	AbortTransaction(context.Context) error
+
+	CommitTransaction(context.Context) error
+}
+
+type Session interface {
+	SessionContext
 
 	Context() SessionContext
 
 	StartTransaction(...*TransactionOptions) error
 
-	AbortTransaction(context.Context) error
-
-	CommitTransaction(context.Context) error
-
-	WithTransaction(context.Context, func(ctx context.Context) (interface{}, error), ...*TransactionOptions) (interface{}, error)
+	WithTransaction(context.Context, func(SessionContext) (interface{}, error), ...*TransactionOptions) (interface{}, error)
 
 	EndSession(context.Context)
 
@@ -43,7 +45,7 @@ type Session interface {
 }
 
 type session struct {
-	SessionContext
+	mongo.SessionContext
 }
 
 func (this *session) Context() SessionContext {
@@ -62,9 +64,9 @@ func (this *session) CommitTransaction(ctx context.Context) error {
 	return this.SessionContext.CommitTransaction(ctx)
 }
 
-func (this *session) WithTransaction(ctx context.Context, fn func(ctx context.Context) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
+func (this *session) WithTransaction(ctx context.Context, fn func(SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
 	return this.SessionContext.WithTransaction(ctx, func(sCtx mongo.SessionContext) (interface{}, error) {
-		return fn(this.SessionContext)
+		return fn(this)
 	}, opts...)
 }
 

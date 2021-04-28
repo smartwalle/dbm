@@ -16,7 +16,7 @@ type Database interface {
 
 	Collection(name string) Collection
 
-	WithTransaction(ctx context.Context, fn func(sCtx context.Context) (interface{}, error), opts ...*TransactionOptions) (interface{}, error)
+	WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error)
 
 	UseSession(ctx context.Context, fn func(sess Session) error) error
 
@@ -48,7 +48,7 @@ func (this *database) Collection(name string) Collection {
 	return &collection{collection: this.database.Collection(name), database: this}
 }
 
-func (this *database) WithTransaction(ctx context.Context, fn func(sCtx context.Context) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
+func (this *database) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
 	return this.client.WithTransaction(ctx, fn, opts...)
 }
 

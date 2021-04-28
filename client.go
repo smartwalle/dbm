@@ -31,7 +31,7 @@ type Client interface {
 
 	Database(name string) Database
 
-	WithTransaction(ctx context.Context, fn func(sCtx context.Context) (interface{}, error), opts ...*TransactionOptions) (interface{}, error)
+	WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error)
 
 	UseSession(ctx context.Context, fn func(sess Session) error) error
 
@@ -179,7 +179,7 @@ func (this *client) Database(name string) Database {
 // var db = client.Database("xx")
 // var c1 = db.Collection("c1")
 // var c2 = db.Collection("c2")
-// db.WithTransaction(context.Background(), func(sCtx context.Context) (interface{}, error) {
+// db.WithTransaction(context.Background(), func(sCtx SessionContext) (interface{}, error) {
 //		if _, sErr := c1.Insert(sCtx, ...); sErr != nil {
 //			return nil, sErr
 //		}
@@ -188,7 +188,7 @@ func (this *client) Database(name string) Database {
 //		}
 //		return nil, nil
 // }
-func (this *client) WithTransaction(ctx context.Context, fn func(sCtx context.Context) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
+func (this *client) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
 	var sess, err = this.StartSession(ctx)
 	if err != nil {
 		return nil, err
@@ -218,7 +218,7 @@ func (this *client) UseSession(ctx context.Context, fn func(sess Session) error)
 	if this.transactionAllowed == false {
 		return ErrSessionNotSupported
 	}
-	return this.client.UseSession(ctx, func(sCtx SessionContext) error {
+	return this.client.UseSession(ctx, func(sCtx mongo.SessionContext) error {
 		var s = &session{}
 		s.SessionContext = sCtx
 		return fn(s)
