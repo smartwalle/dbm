@@ -65,8 +65,8 @@ func (this *session) CommitTransaction(ctx context.Context) error {
 }
 
 func (this *session) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
-	return this.SessionContext.WithTransaction(ctx, func(sCtx mongo.SessionContext) (interface{}, error) {
-		return fn(this)
+	return this.SessionContext.WithTransaction(ctx, func(sessionCtx mongo.SessionContext) (interface{}, error) {
+		return fn(sessionCtx)
 	}, opts...)
 }
 
