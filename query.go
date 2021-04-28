@@ -27,7 +27,8 @@ type Query interface {
 
 	Limit(n int64) Query
 
-	Select(selector interface{}) Query
+	Project(projection interface{}) Query
+	Select(projection interface{}) Query
 
 	Skip(n int64) Query
 
@@ -82,7 +83,7 @@ type query struct {
 	noCursorTimeout     *bool
 	projection          interface{}
 	returnKey           *bool
-	showRecordID        *bool
+	showRecordId        *bool
 	skip                *int64
 	sort                interface{}
 
@@ -150,6 +151,11 @@ func (this *query) NoCursorTimeout(b bool) Query {
 	return this
 }
 
+func (this *query) Project(projection interface{}) Query {
+	this.projection = projection
+	return this
+}
+
 func (this *query) Select(projection interface{}) Query {
 	this.projection = projection
 	return this
@@ -161,7 +167,7 @@ func (this *query) ReturnKey(b bool) Query {
 }
 
 func (this *query) ShowRecordId(b bool) Query {
-	this.showRecordID = &b
+	this.showRecordId = &b
 	return this
 }
 
@@ -258,8 +264,8 @@ func (this *query) One(result interface{}) error {
 	if this.returnKey != nil {
 		opts.SetReturnKey(*this.returnKey)
 	}
-	if this.showRecordID != nil {
-		opts.SetShowRecordID(*this.showRecordID)
+	if this.showRecordId != nil {
+		opts.SetShowRecordID(*this.showRecordId)
 	}
 	if this.skip != nil {
 		opts.SetSkip(*this.skip)
@@ -344,8 +350,8 @@ func (this *query) Cursor() Cursor {
 	if this.returnKey != nil {
 		opts.SetReturnKey(*this.returnKey)
 	}
-	if this.showRecordID != nil {
-		opts.SetShowRecordID(*this.showRecordID)
+	if this.showRecordId != nil {
+		opts.SetShowRecordID(*this.showRecordId)
 	}
 	if this.skip != nil {
 		opts.SetSkip(*this.skip)
@@ -367,7 +373,7 @@ type FindUpdate interface {
 
 	MaxTime(d time.Duration) FindUpdate
 
-	Projection(projection interface{}) FindUpdate
+	Project(projection interface{}) FindUpdate
 
 	ReturnDocument(rd ReturnDocument) FindUpdate
 
@@ -409,7 +415,7 @@ func (this *findUpdate) MaxTime(d time.Duration) FindUpdate {
 	return this
 }
 
-func (this *findUpdate) Projection(projection interface{}) FindUpdate {
+func (this *findUpdate) Project(projection interface{}) FindUpdate {
 	this.opts.SetProjection(projection)
 	return this
 }
@@ -449,7 +455,7 @@ type FindReplace interface {
 
 	MaxTime(d time.Duration) FindReplace
 
-	Projection(projection interface{}) FindReplace
+	Project(projection interface{}) FindReplace
 
 	ReturnDocument(rd ReturnDocument) FindReplace
 
@@ -486,7 +492,7 @@ func (this *findReplace) MaxTime(d time.Duration) FindReplace {
 	return this
 }
 
-func (this *findReplace) Projection(projection interface{}) FindReplace {
+func (this *findReplace) Project(projection interface{}) FindReplace {
 	this.opts.SetProjection(projection)
 	return this
 }
@@ -524,7 +530,7 @@ type FindDelete interface {
 
 	MaxTime(d time.Duration) FindDelete
 
-	Projection(projection interface{}) FindDelete
+	Project(projection interface{}) FindDelete
 
 	Sort(fields ...string) FindDelete
 
@@ -551,7 +557,7 @@ func (this *findDelete) MaxTime(d time.Duration) FindDelete {
 	return this
 }
 
-func (this *findDelete) Projection(projection interface{}) FindDelete {
+func (this *findDelete) Project(projection interface{}) FindDelete {
 	this.opts.SetProjection(projection)
 	return this
 }
