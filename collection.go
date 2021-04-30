@@ -48,6 +48,10 @@ type Collection interface {
 
 	FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}) FindUpdate
 
+	FindOneAndReplace(ctx context.Context, filter interface{}, replacement interface{}) FindReplace
+
+	FindOneAndDelete(ctx context.Context, filter interface{}) FindDelete
+
 	// TODO Distinct
 	// TODO BulkWrite
 
