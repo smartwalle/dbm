@@ -20,15 +20,17 @@ type Collection interface {
 
 	InsertOne(ctx context.Context, document interface{}) (*InsertOneResult, error)
 
+	InsertOneNx(ctx context.Context, filter interface{}, document interface{}) (*UpdateResult, error)
+
 	InsertMany(ctx context.Context, documents []interface{}) (*InsertManyResult, error)
 
 	Insert(ctx context.Context, documents ...interface{}) (*InsertManyResult, error)
 
-	ReplaceOne(ctx context.Context, filter interface{}, document interface{}) (*UpdateResult, error)
+	ReplaceOne(ctx context.Context, filter interface{}, replacement interface{}) (*UpdateResult, error)
 
-	Upsert(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error)
+	Upsert(ctx context.Context, filter interface{}, replacement interface{}) (*UpdateResult, error)
 
-	UpsertId(ctx context.Context, id interface{}, update interface{}) (*UpdateResult, error)
+	UpsertId(ctx context.Context, id interface{}, replacement interface{}) (*UpdateResult, error)
 
 	UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error)
 
@@ -88,6 +90,11 @@ func (this *collection) InsertOne(ctx context.Context, document interface{}) (*I
 	return this.collection.InsertOne(ctx, document, opts)
 }
 
+func (this *collection) InsertOneNx(ctx context.Context, filter interface{}, document interface{}) (*UpdateResult, error) {
+	var opts = options.Update().SetUpsert(true)
+	return this.collection.UpdateOne(ctx, filter, bson.M{"$setOnInsert": document}, opts)
+}
+
 func (this *collection) InsertMany(ctx context.Context, documents []interface{}) (*InsertManyResult, error) {
 	var opts = options.InsertMany()
 	return this.collection.InsertMany(ctx, documents, opts)
@@ -98,19 +105,19 @@ func (this *collection) Insert(ctx context.Context, documents ...interface{}) (*
 	return this.collection.InsertMany(ctx, documents, opts)
 }
 
-func (this *collection) ReplaceOne(ctx context.Context, filter interface{}, document interface{}) (*UpdateResult, error) {
+func (this *collection) ReplaceOne(ctx context.Context, filter interface{}, replacement interface{}) (*UpdateResult, error) {
 	var opts = options.Replace()
-	return this.collection.ReplaceOne(ctx, filter, document, opts)
+	return this.collection.ReplaceOne(ctx, filter, replacement, opts)
 }
 
-func (this *collection) Upsert(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error) {
+func (this *collection) Upsert(ctx context.Context, filter interface{}, replacement interface{}) (*UpdateResult, error) {
 	var opts = options.Replace().SetUpsert(true)
-	return this.collection.ReplaceOne(ctx, filter, update, opts)
+	return this.collection.ReplaceOne(ctx, filter, replacement, opts)
 }
 
-func (this *collection) UpsertId(ctx context.Context, id interface{}, update interface{}) (*UpdateResult, error) {
+func (this *collection) UpsertId(ctx context.Context, id interface{}, replacement interface{}) (*UpdateResult, error) {
 	var opts = options.Replace().SetUpsert(true)
-	return this.collection.ReplaceOne(ctx, bson.M{"_id": id}, update, opts)
+	return this.collection.ReplaceOne(ctx, bson.M{"_id": id}, replacement, opts)
 }
 
 func (this *collection) UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error) {
