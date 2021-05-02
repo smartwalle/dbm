@@ -13,8 +13,7 @@ type User struct {
 }
 
 func main() {
-	//var cfg = dbm.NewConfig("mongodb+srv://smartwalle:smartwalle@smartwalle.kbxxd.mongodb.net/?retryWrites=true&w=majority")
-	var cfg = dbm.NewConfig("mongodb://192.168.1.77:30000")
+	var cfg = dbm.NewConfig("mongodb+srv://smartwalle:smartwalle@smartwalle.kbxxd.mongodb.net/?retryWrites=true&w=majority")
 
 	var client, err = dbm.NewClient(context.Background(), cfg)
 	if err != nil {
@@ -26,9 +25,15 @@ func main() {
 	var db = client.Database("test")
 	var tUser = db.Collection("user")
 
-	for i := 0; i < 100000; i++ {
-		var u = &User{}
-		u.Id = dbm.NewObjectId()
-		tUser.InsertOne(context.Background(), u)
+	tUser.Drop(context.Background())
+
+	// insert
+	var u1 = &User{}
+	u1.Id = dbm.NewObjectId()
+	u1.Name = "test name"
+	u1.Age = 18
+	if _, err = tUser.InsertOne(context.Background(), u1); err != nil {
+		fmt.Println("insert error:", err)
+		return
 	}
 }
