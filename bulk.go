@@ -8,6 +8,42 @@ import (
 
 type WriteModel = mongo.WriteModel
 
+type InsertOneModel = mongo.InsertOneModel
+
+type DeleteOneModel = mongo.DeleteOneModel
+
+type DeleteManyModel = mongo.DeleteManyModel
+
+type ReplaceOneModel = mongo.ReplaceOneModel
+
+type UpdateOneModel = mongo.UpdateOneModel
+
+type UpdateManyModel = mongo.UpdateManyModel
+
+func NewInsertOneModel() *InsertOneModel {
+	return mongo.NewInsertOneModel()
+}
+
+func NewDeleteOneModel() *DeleteOneModel {
+	return mongo.NewDeleteOneModel()
+}
+
+func NewDeleteManyModel() *DeleteManyModel {
+	return mongo.NewDeleteManyModel()
+}
+
+func NewReplaceOneModel() *ReplaceOneModel {
+	return mongo.NewReplaceOneModel()
+}
+
+func NewUpdateOneModel() *UpdateOneModel {
+	return mongo.NewUpdateOneModel()
+}
+
+func NewUpdateManyModel() *UpdateManyModel {
+	return mongo.NewUpdateManyModel()
+}
+
 type Bulk interface {
 	Ordered(ordered bool) Bulk
 
@@ -65,13 +101,13 @@ func (this *bulk) AddModel(m WriteModel) Bulk {
 }
 
 func (this *bulk) InsertOne(document interface{}) Bulk {
-	var m = mongo.NewInsertOneModel()
+	var m = NewInsertOneModel()
 	m.SetDocument(document)
 	return this.AddModel(m)
 }
 
 func (this *bulk) InsertOneNx(filter interface{}, document interface{}) Bulk {
-	var m = mongo.NewUpdateOneModel()
+	var m = NewUpdateOneModel()
 	m.SetUpsert(true)
 	m.SetFilter(filter)
 	m.SetUpdate(M{"$setOnInsert": document})
@@ -79,14 +115,14 @@ func (this *bulk) InsertOneNx(filter interface{}, document interface{}) Bulk {
 }
 
 func (this *bulk) ReplaceOne(filter interface{}, replacement interface{}) Bulk {
-	var m = mongo.NewReplaceOneModel()
+	var m = NewReplaceOneModel()
 	m.SetFilter(filter)
 	m.SetReplacement(replacement)
 	return this.AddModel(m)
 }
 
 func (this *bulk) Upsert(filter interface{}, replacement interface{}) Bulk {
-	var m = mongo.NewReplaceOneModel()
+	var m = NewReplaceOneModel()
 	m.SetFilter(filter)
 	m.SetReplacement(replacement)
 	m.SetUpsert(true)
@@ -98,7 +134,7 @@ func (this *bulk) UpsertId(id interface{}, replacement interface{}) Bulk {
 }
 
 func (this *bulk) UpdateOne(filter interface{}, update interface{}) Bulk {
-	var m = mongo.NewUpdateOneModel()
+	var m = NewUpdateOneModel()
 	m.SetFilter(filter)
 	m.SetUpdate(update)
 	return this.AddModel(m)
@@ -109,14 +145,14 @@ func (this *bulk) UpdateId(id interface{}, update interface{}) Bulk {
 }
 
 func (this *bulk) UpdateMany(filter interface{}, update interface{}) Bulk {
-	var m = mongo.NewUpdateManyModel()
+	var m = NewUpdateManyModel()
 	m.SetFilter(filter)
 	m.SetUpdate(update)
 	return this.AddModel(m)
 }
 
 func (this *bulk) DeleteOne(filter interface{}) Bulk {
-	var m = mongo.NewDeleteOneModel()
+	var m = NewDeleteOneModel()
 	m.SetFilter(filter)
 	return this.AddModel(m)
 }
@@ -126,7 +162,7 @@ func (this *bulk) DeleteId(id interface{}) Bulk {
 }
 
 func (this *bulk) DeleteMany(filter interface{}) Bulk {
-	var m = mongo.NewDeleteManyModel()
+	var m = NewDeleteManyModel()
 	m.SetFilter(filter)
 	return this.AddModel(m)
 }
