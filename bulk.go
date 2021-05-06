@@ -1,0 +1,137 @@
+package dbm
+
+import (
+	"context"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+type WriteModel = mongo.WriteModel
+
+type Bulk interface {
+	Ordered(ordered bool) Bulk
+
+	BypassDocumentValidation(bypass bool) Bulk
+
+	AddModel(m WriteModel) Bulk
+
+	InsertOne(document interface{}) Bulk
+
+	InsertOneNx(filter interface{}, document interface{}) Bulk
+
+	ReplaceOne(filter interface{}, replacement interface{}) Bulk
+
+	Upsert(filter interface{}, replacement interface{}) Bulk
+
+	UpsertId(id interface{}, replacement interface{}) Bulk
+
+	UpdateOne(filter interface{}, update interface{}) Bulk
+
+	UpdateId(id interface{}, update interface{}) Bulk
+
+	UpdateMany(filter interface{}, update interface{}) Bulk
+
+	DeleteOne(filter interface{}) Bulk
+
+	DeleteId(id interface{}) Bulk
+
+	DeleteMany(filter interface{}) Bulk
+
+	Apply() (*BulkResult, error)
+}
+
+type bulk struct {
+	models     []mongo.WriteModel
+	ctx        context.Context
+	opts       *options.BulkWriteOptions
+	collection *mongo.Collection
+}
+
+func (this *bulk) Ordered(ordered bool) Bulk {
+	this.opts.SetOrdered(ordered)
+	return this
+}
+
+func (this *bulk) BypassDocumentValidation(bypass bool) Bulk {
+	this.opts.SetBypassDocumentValidation(bypass)
+	return this
+}
+
+func (this *bulk) AddModel(m WriteModel) Bulk {
+	if m != nil {
+		this.models = append(this.models, m)
+	}
+	return this
+}
+
+func (this *bulk) InsertOne(document interface{}) Bulk {
+	var m = mongo.NewInsertOneModel()
+	m.SetDocument(document)
+	return this.AddModel(m)
+}
+
+func (this *bulk) InsertOneNx(filter interface{}, document interface{}) Bulk {
+	var m = mongo.NewUpdateOneModel()
+	m.SetUpsert(true)
+	m.SetFilter(filter)
+	m.SetUpdate(M{"$setOnInsert": document})
+	return this.AddModel(m)
+}
+
+func (this *bulk) ReplaceOne(filter interface{}, replacement interface{}) Bulk {
+	var m = mongo.NewReplaceOneModel()
+	m.SetFilter(filter)
+	m.SetReplacement(replacement)
+	return this.AddModel(m)
+}
+
+func (this *bulk) Upsert(filter interface{}, replacement interface{}) Bulk {
+	var m = mongo.NewReplaceOneModel()
+	m.SetFilter(filter)
+	m.SetReplacement(replacement)
+	m.SetUpsert(true)
+	return this.AddModel(m)
+}
+
+func (this *bulk) UpsertId(id interface{}, replacement interface{}) Bulk {
+	return this.Upsert(M{"_id": id}, replacement)
+}
+
+func (this *bulk) UpdateOne(filter interface{}, update interface{}) Bulk {
+	var m = mongo.NewUpdateOneModel()
+	m.SetFilter(filter)
+	m.SetUpdate(update)
+	return this.AddModel(m)
+}
+
+func (this *bulk) UpdateId(id interface{}, update interface{}) Bulk {
+	return this.UpdateOne(M{"_id": id}, update)
+}
+
+func (this *bulk) UpdateMany(filter interface{}, update interface{}) Bulk {
+	var m = mongo.NewUpdateManyModel()
+	m.SetFilter(filter)
+	m.SetUpdate(update)
+	return this.AddModel(m)
+}
+
+func (this *bulk) DeleteOne(filter interface{}) Bulk {
+	var m = mongo.NewDeleteOneModel()
+	m.SetFilter(filter)
+	return this.AddModel(m)
+}
+
+func (this *bulk) DeleteId(id interface{}) Bulk {
+	return this.DeleteOne(M{"_id": id})
+}
+
+func (this *bulk) DeleteMany(filter interface{}) Bulk {
+	var m = mongo.NewDeleteManyModel()
+	m.SetFilter(filter)
+	return this.AddModel(m)
+}
+
+func (this *bulk) Apply() (*BulkResult, error) {
+	var result, err = this.collection.BulkWrite(this.ctx, this.models, this.opts)
+	return result, err
+}

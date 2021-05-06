@@ -9,3 +9,5 @@ type InsertManyResult = mongo.InsertManyResult
 type DeleteResult = mongo.DeleteResult
 
 type UpdateResult = mongo.UpdateResult
+
+type BulkResult = mongo.BulkWriteResult

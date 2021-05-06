@@ -53,7 +53,8 @@ type Collection interface {
 	FindOneAndDelete(ctx context.Context, filter interface{}) FindDelete
 
 	// TODO Distinct
-	// TODO BulkWrite
+
+	Bulk(ctx context.Context) Bulk
 
 	Aggregate(ctx context.Context, pipeline interface{}) Aggregate
 
@@ -189,6 +190,14 @@ func (this *collection) FindOneAndDelete(ctx context.Context, filter interface{}
 	q.opts = options.FindOneAndDelete()
 	q.collection = this.collection
 	return q
+}
+
+func (this *collection) Bulk(ctx context.Context) Bulk {
+	var b = &bulk{}
+	b.ctx = ctx
+	b.opts = options.BulkWrite()
+	b.collection = this.collection
+	return b
 }
 
 func (this *collection) Aggregate(ctx context.Context, pipeline interface{}) Aggregate {
