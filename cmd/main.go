@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	Id   dbm.ObjectId `bson:"_id"`
+	Id   dbm.ObjectId `bson:"_id,omitempty"`
 	Name string       `bson:"name"`
 	Age  int          `bson:"age"`
 }
@@ -29,7 +29,6 @@ func main() {
 
 	// insert
 	var u1 = &User{}
-	u1.Id = dbm.NewObjectId()
 	u1.Name = "test name"
 	u1.Age = 18
 	if _, err = tUser.InsertOne(context.Background(), u1); err != nil {

@@ -52,7 +52,7 @@ type Collection interface {
 
 	FindOneAndDelete(ctx context.Context, filter interface{}) FindDelete
 
-	// TODO Distinct
+	Distinct(ctx context.Context, fieldName string, filter interface{}) Distinct
 
 	Bulk(ctx context.Context) Bulk
 
@@ -190,6 +190,16 @@ func (this *collection) FindOneAndDelete(ctx context.Context, filter interface{}
 	q.opts = options.FindOneAndDelete()
 	q.collection = this.collection
 	return q
+}
+
+func (this *collection) Distinct(ctx context.Context, fieldName string, filter interface{}) Distinct {
+	var d = &distinct{}
+	d.filter = filter
+	d.fieldName = fieldName
+	d.ctx = ctx
+	d.opts = options.Distinct()
+	d.collection = this.collection
+	return d
 }
 
 func (this *collection) Bulk(ctx context.Context) Bulk {

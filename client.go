@@ -104,7 +104,7 @@ func connectTopology(cfg *Config) (*topology.Topology, error) {
 }
 
 func connect(ctx context.Context, opts *options.ClientOptions) (*mongo.Client, error) {
-	var client, err = mongo.Connect(ctx, opts)
+	var nClient, err = mongo.Connect(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -112,10 +112,10 @@ func connect(ctx context.Context, opts *options.ClientOptions) (*mongo.Client, e
 	var nCtx, cancel = context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
-	if err = client.Ping(nCtx, readpref.Primary()); err != nil {
+	if err = nClient.Ping(nCtx, readpref.Primary()); err != nil {
 		return nil, err
 	}
-	return client, nil
+	return nClient, nil
 }
 
 func load(ctx context.Context, topo *topology.Topology, client *mongo.Client) (*info, error) {
