@@ -3,7 +3,6 @@ package dbm
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"reflect"
 	"time"
@@ -22,7 +21,7 @@ type distinct struct {
 	fieldName  string
 	ctx        context.Context
 	opts       *options.DistinctOptions
-	collection *mongo.Collection
+	collection Collection
 }
 
 func (this *distinct) Collation(c *Collation) Distinct {
@@ -46,12 +45,12 @@ func (this *distinct) Apply(result interface{}) error {
 		return ErrResultNotSlice
 	}
 
-	var data, err = this.collection.Distinct(this.ctx, this.fieldName, this.filter, this.opts)
+	var data, err = this.collection.Collection().Distinct(this.ctx, this.fieldName, this.filter, this.opts)
 	if err != nil {
 		return err
 	}
 
-	valueType, valueBytes, err := bson.MarshalValue(data)
+	valueType, valueBytes, err := bson.MarshalValueWithRegistry(this.collection.Database().Client().Registry(), data)
 	if err != nil {
 		return err
 	}

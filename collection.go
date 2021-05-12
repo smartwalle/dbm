@@ -158,7 +158,7 @@ func (this *collection) DeleteMany(ctx context.Context, filter interface{}) (*De
 func (this *collection) Find(ctx context.Context, filter interface{}) Query {
 	var q = &query{}
 	q.ctx = ctx
-	q.collection = this.collection
+	q.collection = this
 	q.filter = filter
 	return q
 }
@@ -169,7 +169,7 @@ func (this *collection) FindOneAndUpdate(ctx context.Context, filter interface{}
 	q.update = update
 	q.ctx = ctx
 	q.opts = options.FindOneAndUpdate()
-	q.collection = this.collection
+	q.collection = this
 	return q
 }
 
@@ -179,7 +179,7 @@ func (this *collection) FindOneAndReplace(ctx context.Context, filter interface{
 	q.replacement = replacement
 	q.ctx = ctx
 	q.opts = options.FindOneAndReplace()
-	q.collection = this.collection
+	q.collection = this
 	return q
 }
 
@@ -188,7 +188,7 @@ func (this *collection) FindOneAndDelete(ctx context.Context, filter interface{}
 	q.filter = filter
 	q.ctx = ctx
 	q.opts = options.FindOneAndDelete()
-	q.collection = this.collection
+	q.collection = this
 	return q
 }
 
@@ -198,7 +198,7 @@ func (this *collection) Distinct(ctx context.Context, fieldName string, filter i
 	d.fieldName = fieldName
 	d.ctx = ctx
 	d.opts = options.Distinct()
-	d.collection = this.collection
+	d.collection = this
 	return d
 }
 
@@ -206,7 +206,7 @@ func (this *collection) Bulk(ctx context.Context) Bulk {
 	var b = &bulk{}
 	b.ctx = ctx
 	b.opts = options.BulkWrite()
-	b.collection = this.collection
+	b.collection = this
 	return b
 }
 
@@ -215,7 +215,7 @@ func (this *collection) Aggregate(ctx context.Context, pipeline interface{}) Agg
 	a.pipeline = pipeline
 	a.ctx = ctx
 	a.opts = options.Aggregate()
-	a.collection = this.collection
+	a.collection = this
 	return a
 }
 

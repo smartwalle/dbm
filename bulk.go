@@ -80,7 +80,7 @@ type bulk struct {
 	models     []mongo.WriteModel
 	ctx        context.Context
 	opts       *options.BulkWriteOptions
-	collection *mongo.Collection
+	collection Collection
 }
 
 func (this *bulk) Ordered(ordered bool) Bulk {
@@ -168,6 +168,6 @@ func (this *bulk) DeleteMany(filter interface{}) Bulk {
 }
 
 func (this *bulk) Apply() (*BulkResult, error) {
-	var result, err = this.collection.BulkWrite(this.ctx, this.models, this.opts)
+	var result, err = this.collection.Collection().BulkWrite(this.ctx, this.models, this.opts)
 	return result, err
 }

@@ -3,6 +3,7 @@ package dbm
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/bsoncodec"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/description"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -18,6 +19,8 @@ import (
 
 type Client interface {
 	Client() *mongo.Client
+
+	Registry() *bsoncodec.Registry
 
 	Close(ctx context.Context) error
 
@@ -54,6 +57,10 @@ func NewClient(ctx context.Context, cfg *Config) (Client, error) {
 	var topo, err = connectTopology(cfg)
 	if err != nil {
 		return nil, err
+	}
+
+	if cfg.ClientOptions.Registry == nil {
+		cfg.ClientOptions.SetRegistry(bson.DefaultRegistry)
 	}
 
 	mClient, err := connect(ctx, cfg.ClientOptions)
@@ -148,6 +155,10 @@ func serverStatus(ctx context.Context, client *mongo.Client) (bson.Raw, error) {
 
 func (this *client) Client() *mongo.Client {
 	return this.client
+}
+
+func (this *client) Registry() *bsoncodec.Registry {
+	return this.cfg.Registry
 }
 
 func (this *client) Close(ctx context.Context) error {

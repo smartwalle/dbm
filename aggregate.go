@@ -2,7 +2,6 @@ package dbm
 
 import (
 	"context"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
@@ -36,7 +35,7 @@ type aggregate struct {
 
 	ctx        context.Context
 	opts       *options.AggregateOptions
-	collection *mongo.Collection
+	collection Collection
 }
 
 func (this *aggregate) AllowDiskUse(b bool) Aggregate {
@@ -95,6 +94,6 @@ func (this *aggregate) All(result interface{}) error {
 }
 
 func (this *aggregate) Cursor() Cursor {
-	var cur, err = this.collection.Aggregate(this.ctx, this.pipeline, this.opts)
+	var cur, err = this.collection.Collection().Aggregate(this.ctx, this.pipeline, this.opts)
 	return &cursor{Cursor: cur, err: err}
 }

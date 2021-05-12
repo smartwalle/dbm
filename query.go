@@ -3,7 +3,6 @@ package dbm
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"strings"
 	"time"
@@ -88,7 +87,7 @@ type query struct {
 	sort                interface{}
 
 	ctx        context.Context
-	collection *mongo.Collection
+	collection Collection
 }
 
 func (this *query) AllowDiskUse(b bool) Query {
@@ -274,7 +273,7 @@ func (this *query) One(result interface{}) error {
 		opts.SetSort(this.sort)
 	}
 
-	return this.collection.FindOne(this.ctx, this.filter, opts).Decode(result)
+	return this.collection.Collection().FindOne(this.ctx, this.filter, opts).Decode(result)
 }
 
 func (this *query) All(result interface{}) error {
@@ -302,7 +301,7 @@ func (this *query) Count() (n int64, err error) {
 		opts.SetSkip(*this.skip)
 	}
 
-	return this.collection.CountDocuments(this.ctx, this.filter, opts)
+	return this.collection.Collection().CountDocuments(this.ctx, this.filter, opts)
 }
 
 func (this *query) Cursor() Cursor {
@@ -360,7 +359,7 @@ func (this *query) Cursor() Cursor {
 		opts.SetSort(this.sort)
 	}
 
-	var cur, err = this.collection.Find(this.ctx, this.filter, opts)
+	var cur, err = this.collection.Collection().Find(this.ctx, this.filter, opts)
 	return &cursor{Cursor: cur, err: err}
 }
 
@@ -392,7 +391,7 @@ type findUpdate struct {
 
 	ctx        context.Context
 	opts       *options.FindOneAndUpdateOptions
-	collection *mongo.Collection
+	collection Collection
 }
 
 func (this *findUpdate) ArrayFilters(filters ArrayFilters) FindUpdate {
@@ -444,7 +443,7 @@ func (this *findUpdate) Hint(hint interface{}) FindUpdate {
 }
 
 func (this *findUpdate) Apply(result interface{}) error {
-	var err = this.collection.FindOneAndUpdate(this.ctx, this.filter, this.update, this.opts).Decode(result)
+	var err = this.collection.Collection().FindOneAndUpdate(this.ctx, this.filter, this.update, this.opts).Decode(result)
 	return err
 }
 
@@ -474,7 +473,7 @@ type findReplace struct {
 
 	ctx        context.Context
 	opts       *options.FindOneAndReplaceOptions
-	collection *mongo.Collection
+	collection Collection
 }
 
 func (this *findReplace) BypassDocumentValidation(b bool) FindReplace {
@@ -521,7 +520,7 @@ func (this *findReplace) Hint(hint interface{}) FindReplace {
 }
 
 func (this *findReplace) Apply(result interface{}) error {
-	var err = this.collection.FindOneAndReplace(this.ctx, this.filter, this.replacement, this.opts).Decode(result)
+	var err = this.collection.Collection().FindOneAndReplace(this.ctx, this.filter, this.replacement, this.opts).Decode(result)
 	return err
 }
 
@@ -544,7 +543,7 @@ type findDelete struct {
 
 	ctx        context.Context
 	opts       *options.FindOneAndDeleteOptions
-	collection *mongo.Collection
+	collection Collection
 }
 
 func (this *findDelete) Collation(c *Collation) FindDelete {
@@ -576,6 +575,6 @@ func (this *findDelete) Hint(hint interface{}) FindDelete {
 }
 
 func (this *findDelete) Apply(result interface{}) error {
-	var err = this.collection.FindOneAndDelete(this.ctx, this.filter, this.opts).Decode(result)
+	var err = this.collection.Collection().FindOneAndDelete(this.ctx, this.filter, this.opts).Decode(result)
 	return err
 }
