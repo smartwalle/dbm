@@ -39,6 +39,8 @@ type Client interface {
 	UseSession(ctx context.Context, fn func(sess Session) error) error
 
 	StartSession(ctx context.Context) (Session, error)
+
+	StartWatch(ctx context.Context, pipeline interface{}) Watch
 }
 
 type client struct {
@@ -263,6 +265,15 @@ func (this *client) StartSession(ctx context.Context) (Session, error) {
 		return nil, err
 	}
 	return &session{SessionContext: mongo.NewSessionContext(ctx, sess)}, nil
+}
+
+func (this *client) StartWatch(ctx context.Context, pipeline interface{}) Watch {
+	var w = &watch{}
+	w.pipeline = pipeline
+	w.ctx = ctx
+	w.opts = options.ChangeStream()
+	w.watcher = this.client
+	return w
 }
 
 func CompareServerVersions(v1 string, v2 string) int {

@@ -59,6 +59,8 @@ type Collection interface {
 	Aggregate(ctx context.Context, pipeline interface{}) Aggregate
 
 	IndexView() IndexView
+
+	StartWatch(ctx context.Context, pipeline interface{}) Watch
 }
 
 type collection struct {
@@ -215,11 +217,20 @@ func (this *collection) Aggregate(ctx context.Context, pipeline interface{}) Agg
 	a.pipeline = pipeline
 	a.ctx = ctx
 	a.opts = options.Aggregate()
-	a.collection = this
+	a.aggregator = this.collection
 	return a
 }
 
 func (this *collection) IndexView() IndexView {
 	var view = this.collection.Indexes()
 	return &indexView{view: view}
+}
+
+func (this *collection) StartWatch(ctx context.Context, pipeline interface{}) Watch {
+	var w = &watch{}
+	w.pipeline = pipeline
+	w.ctx = ctx
+	w.opts = options.ChangeStream()
+	w.watcher = this.collection
+	return w
 }

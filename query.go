@@ -14,9 +14,16 @@ type ArrayFilters = options.ArrayFilters
 
 type ReturnDocument = options.ReturnDocument
 
+type FullDocument = options.FullDocument
+
 const (
 	Before = options.Before
 	After  = options.After
+)
+
+const (
+	Default      = options.Default
+	UpdateLookup = options.UpdateLookup
 )
 
 type Query interface {

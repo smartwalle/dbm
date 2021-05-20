@@ -1,6 +1,7 @@
 package dbm
 
 import (
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
@@ -39,6 +40,8 @@ type E = primitive.E
 type M = primitive.M
 
 type A = primitive.A
+
+type Raw = bson.Raw
 
 type DateTime = primitive.DateTime
 

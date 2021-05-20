@@ -3,6 +3,7 @@ package dbm
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Database interface {
@@ -21,6 +22,8 @@ type Database interface {
 	UseSession(ctx context.Context, fn func(sess Session) error) error
 
 	StartSession(ctx context.Context) (Session, error)
+
+	StartWatch(ctx context.Context, pipeline interface{}) Watch
 }
 
 type database struct {
@@ -58,4 +61,22 @@ func (this *database) UseSession(ctx context.Context, fn func(sess Session) erro
 
 func (this *database) StartSession(ctx context.Context) (Session, error) {
 	return this.client.StartSession(ctx)
+}
+
+func (this *database) Aggregate(ctx context.Context, pipeline interface{}) Aggregate {
+	var a = &aggregate{}
+	a.pipeline = pipeline
+	a.ctx = ctx
+	a.opts = options.Aggregate()
+	a.aggregator = this.database
+	return a
+}
+
+func (this *database) StartWatch(ctx context.Context, pipeline interface{}) Watch {
+	var w = &watch{}
+	w.pipeline = pipeline
+	w.ctx = ctx
+	w.opts = options.ChangeStream()
+	w.watcher = this.database
+	return w
 }

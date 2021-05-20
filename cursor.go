@@ -12,9 +12,9 @@ type Cursor interface {
 
 	TryNext(ctx context.Context) bool
 
-	One(ctx context.Context, results interface{}) error
+	One(result interface{}) error
 
-	All(ctx context.Context, results interface{}) error
+	All(ctx context.Context, result interface{}) error
 
 	RemainingBatchLength() int
 
@@ -49,18 +49,18 @@ func (this *cursor) TryNext(ctx context.Context) bool {
 	return this.Cursor.TryNext(ctx)
 }
 
-func (this *cursor) One(ctx context.Context, results interface{}) error {
+func (this *cursor) One(result interface{}) error {
 	if this.err != nil {
 		return this.err
 	}
-	return this.Cursor.Decode(results)
+	return this.Cursor.Decode(result)
 }
 
-func (this *cursor) All(ctx context.Context, results interface{}) error {
+func (this *cursor) All(ctx context.Context, result interface{}) error {
 	if this.err != nil {
 		return this.err
 	}
-	return this.Cursor.All(ctx, results)
+	return this.Cursor.All(ctx, result)
 }
 
 func (this *cursor) RemainingBatchLength() int {
