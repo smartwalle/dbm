@@ -18,6 +18,8 @@ type Collection interface {
 
 	Clone() (Collection, error)
 
+	IndexView() IndexView
+
 	InsertOne(ctx context.Context, document interface{}) (*InsertOneResult, error)
 
 	InsertOneNx(ctx context.Context, filter interface{}, document interface{}) (*UpdateResult, error)
@@ -58,8 +60,6 @@ type Collection interface {
 
 	Aggregate(ctx context.Context, pipeline interface{}) Aggregate
 
-	IndexView() IndexView
-
 	Watch(ctx context.Context, pipeline interface{}) Watcher
 }
 
@@ -90,6 +90,11 @@ func (this *collection) Clone() (Collection, error) {
 		return nil, err
 	}
 	return &collection{collection: nCollection, database: this.database}, nil
+}
+
+func (this *collection) IndexView() IndexView {
+	var view = this.collection.Indexes()
+	return &indexView{view: view}
 }
 
 func (this *collection) InsertOne(ctx context.Context, document interface{}) (*InsertOneResult, error) {
@@ -219,11 +224,6 @@ func (this *collection) Aggregate(ctx context.Context, pipeline interface{}) Agg
 	a.opts = options.Aggregate()
 	a.aggregator = this.collection
 	return a
-}
-
-func (this *collection) IndexView() IndexView {
-	var view = this.collection.Indexes()
-	return &indexView{view: view}
 }
 
 func (this *collection) Watch(ctx context.Context, pipeline interface{}) Watcher {
