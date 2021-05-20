@@ -40,7 +40,7 @@ type Client interface {
 
 	StartSession(ctx context.Context) (Session, error)
 
-	StartWatch(ctx context.Context, pipeline interface{}) Watch
+	Watch(ctx context.Context, pipeline interface{}) Watcher
 }
 
 type client struct {
@@ -267,7 +267,7 @@ func (this *client) StartSession(ctx context.Context) (Session, error) {
 	return &session{SessionContext: mongo.NewSessionContext(ctx, sess)}, nil
 }
 
-func (this *client) StartWatch(ctx context.Context, pipeline interface{}) Watch {
+func (this *client) Watch(ctx context.Context, pipeline interface{}) Watcher {
 	var w = &watch{}
 	w.pipeline = pipeline
 	w.ctx = ctx

@@ -60,7 +60,7 @@ type Collection interface {
 
 	IndexView() IndexView
 
-	StartWatch(ctx context.Context, pipeline interface{}) Watch
+	Watch(ctx context.Context, pipeline interface{}) Watcher
 }
 
 type collection struct {
@@ -226,7 +226,7 @@ func (this *collection) IndexView() IndexView {
 	return &indexView{view: view}
 }
 
-func (this *collection) StartWatch(ctx context.Context, pipeline interface{}) Watch {
+func (this *collection) Watch(ctx context.Context, pipeline interface{}) Watcher {
 	var w = &watch{}
 	w.pipeline = pipeline
 	w.ctx = ctx

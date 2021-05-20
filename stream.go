@@ -11,20 +11,20 @@ type watcher interface {
 	Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*mongo.ChangeStream, error)
 }
 
-type Watch interface {
-	BatchSize(n int32) Watch
+type Watcher interface {
+	BatchSize(n int32) Watcher
 
-	Collation(c Collation) Watch
+	Collation(c Collation) Watcher
 
-	FullDocument(fd FullDocument) Watch
+	FullDocument(fd FullDocument) Watcher
 
-	MaxAwaitTime(d time.Duration) Watch
+	MaxAwaitTime(d time.Duration) Watcher
 
-	ResumeAfter(rt interface{}) Watch
+	ResumeAfter(rt interface{}) Watcher
 
-	StartAtOperationTime(t *Timestamp) Watch
+	StartAtOperationTime(t *Timestamp) Watcher
 
-	StartAfter(sa interface{}) Watch
+	StartAfter(sa interface{}) Watcher
 
 	Stream() Stream
 }
@@ -37,37 +37,37 @@ type watch struct {
 	watcher watcher
 }
 
-func (this *watch) BatchSize(n int32) Watch {
+func (this *watch) BatchSize(n int32) Watcher {
 	this.opts.SetBatchSize(n)
 	return this
 }
 
-func (this *watch) Collation(c Collation) Watch {
+func (this *watch) Collation(c Collation) Watcher {
 	this.opts.SetCollation(c)
 	return this
 }
 
-func (this *watch) FullDocument(fd FullDocument) Watch {
+func (this *watch) FullDocument(fd FullDocument) Watcher {
 	this.opts.SetFullDocument(fd)
 	return this
 }
 
-func (this *watch) MaxAwaitTime(d time.Duration) Watch {
+func (this *watch) MaxAwaitTime(d time.Duration) Watcher {
 	this.opts.SetMaxAwaitTime(d)
 	return this
 }
 
-func (this *watch) ResumeAfter(rt interface{}) Watch {
+func (this *watch) ResumeAfter(rt interface{}) Watcher {
 	this.opts.SetResumeAfter(rt)
 	return this
 }
 
-func (this *watch) StartAtOperationTime(t *Timestamp) Watch {
+func (this *watch) StartAtOperationTime(t *Timestamp) Watcher {
 	this.opts.SetStartAtOperationTime(t)
 	return this
 }
 
-func (this *watch) StartAfter(sa interface{}) Watch {
+func (this *watch) StartAfter(sa interface{}) Watcher {
 	this.opts.SetStartAfter(sa)
 	return this
 }

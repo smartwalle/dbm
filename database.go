@@ -23,7 +23,7 @@ type Database interface {
 
 	StartSession(ctx context.Context) (Session, error)
 
-	StartWatch(ctx context.Context, pipeline interface{}) Watch
+	Watch(ctx context.Context, pipeline interface{}) Watcher
 }
 
 type database struct {
@@ -72,7 +72,7 @@ func (this *database) Aggregate(ctx context.Context, pipeline interface{}) Aggre
 	return a
 }
 
-func (this *database) StartWatch(ctx context.Context, pipeline interface{}) Watch {
+func (this *database) Watch(ctx context.Context, pipeline interface{}) Watcher {
 	var w = &watch{}
 	w.pipeline = pipeline
 	w.ctx = ctx
