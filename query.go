@@ -26,6 +26,14 @@ const (
 	UpdateLookup = options.UpdateLookup
 )
 
+type CursorType = options.CursorType
+
+const (
+	NonTailable   = options.NonTailable
+	Tailable      = options.Tailable
+	TailableAwait = options.TailableAwait
+)
+
 type Query interface {
 	BatchSize(n int32) Query
 
@@ -47,6 +55,8 @@ type Query interface {
 	Collation(c *Collation) Query
 
 	Comment(s string) Query
+
+	CursorType(cursorType CursorType) Query
 
 	Max(m interface{}) Query
 
@@ -119,6 +129,11 @@ func (this *query) Collation(c *Collation) Query {
 
 func (this *query) Comment(s string) Query {
 	this.comment = &s
+	return this
+}
+
+func (this *query) CursorType(cursorType CursorType) Query {
+	this.cursorType = &cursorType
 	return this
 }
 
@@ -328,6 +343,9 @@ func (this *query) Cursor() Cursor {
 	}
 	if this.comment != nil {
 		opts.SetComment(*this.comment)
+	}
+	if this.cursorType != nil {
+		opts.SetCursorType(*this.cursorType)
 	}
 	if this.hint != nil {
 		opts.SetHint(this.hint)
