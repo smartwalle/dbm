@@ -33,9 +33,9 @@ func IsValidObjectId(s string) bool {
 	return primitive.IsValidObjectID(s)
 }
 
-type D = primitive.D
-
 type E = primitive.E
+
+type D = primitive.D
 
 type M = primitive.M
 
@@ -52,3 +52,19 @@ type Null = primitive.Null
 type Regex = primitive.Regex
 
 type Pipeline = mongo.Pipeline
+
+func NewE(key string, value interface{}) E {
+	return E{Key: key, Value: value}
+}
+
+func NewD(items ...E) D {
+	return D(items)
+}
+
+func NewA(items ...interface{}) A {
+	return A(items)
+}
+
+func NewPipeline(items ...D) Pipeline {
+	return Pipeline(items)
+}
