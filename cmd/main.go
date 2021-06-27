@@ -4,12 +4,18 @@ import (
 	"context"
 	"fmt"
 	"github.com/smartwalle/dbm"
+	"github.com/smartwalle/xid"
+	"strconv"
 )
 
 type User struct {
-	Id   dbm.ObjectId `bson:"_id,omitempty"`
-	Name string       `bson:"name"`
-	Age  int          `bson:"age"`
+	Id       dbm.ObjectId `bson:"_id,omitempty"`
+	ServerId int          `bson:"server_id"`
+	UserId   int64        `bson:"user_id"`
+	Name     string       `bson:"name"`
+	Age      int          `bson:"age"`
+	Gender   int          `bson:"gender"`
+	Point    int          `bson:"point"`
 }
 
 func main() {
@@ -27,12 +33,19 @@ func main() {
 
 	tUser.Drop(context.Background())
 
-	// insert
-	var u1 = &User{}
-	u1.Name = "test name"
-	u1.Age = 18
-	if _, err = tUser.InsertOne(context.Background(), u1); err != nil {
-		fmt.Println("insert error:", err)
-		return
+	var indexView = tUser.IndexView()
+	indexView.Drop(context.Background(), "us")
+	indexView.CreateIndex(context.Background(), "us", []string{"server_id", "user_id"})
+
+	for i := 0; i < 100; i++ {
+		var u = &User{}
+		u.ServerId = i % 10
+		u.UserId = xid.Next()
+		u.Name = "u" + strconv.Itoa(i)
+		u.Age = i + 1
+		u.Gender = i%2 + 1
+		u.Point = (i + 1) * 10
+
+		tUser.InsertOne(context.Background(), u)
 	}
 }
