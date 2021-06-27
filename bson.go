@@ -33,13 +33,13 @@ func IsValidObjectId(s string) bool {
 	return primitive.IsValidObjectID(s)
 }
 
-type E = primitive.E
+type E = bson.E
 
-type D = primitive.D
+type D = bson.D
 
-type M = primitive.M
+type M = bson.M
 
-type A = primitive.A
+type A = bson.A
 
 type Raw = bson.Raw
 
@@ -51,17 +51,23 @@ type Null = primitive.Null
 
 type Regex = primitive.Regex
 
+type Decimal128 = primitive.Decimal128
+
 type Pipeline = mongo.Pipeline
 
-func NewE(key string, value interface{}) E {
+func NewDecimal128(h, l uint64) Decimal128 {
+	return primitive.NewDecimal128(h, l)
+}
+
+func EE(key string, value interface{}) E {
 	return E{Key: key, Value: value}
 }
 
-func NewD(items ...E) D {
+func DE(items ...E) D {
 	return D(items)
 }
 
-func NewA(items ...interface{}) A {
+func AE(items ...interface{}) A {
 	return A(items)
 }
 
