@@ -220,9 +220,11 @@ func (this *client) WithTransaction(ctx context.Context, fn func(sCtx SessionCon
 //			return sErr
 //		}
 //		if _, sErr := c1.Insert(sess, ...); sErr != nil {
+//			sess.AbortTransaction(context.Background())
 //			return nil, sErr
 //		}
 //		if _, sErr := c2.Insert(sess, ...); sErr != nil {
+//			sess.AbortTransaction(context.Background())
 //			return nil, sErr
 //		}
 // 		return sess.CommitTransaction(context.Background())
@@ -249,9 +251,11 @@ func (this *client) UseSession(ctx context.Context, fn func(sess Session) error)
 // 		return
 // }
 // if _, sErr := c1.Insert(sess, ...); sErr != nil {
+//		sess.AbortTransaction(context.Background())
 // 		return sErr
 // }
 // if _, sErr := c2.Insert(sess, ...); sErr != nil {
+//		sess.AbortTransaction(context.Background())
 // 		return sErr
 // }
 // sess.CommitTransaction(context.Background())
