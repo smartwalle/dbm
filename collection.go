@@ -104,7 +104,7 @@ func (this *collection) InsertOne(ctx context.Context, document interface{}) (*I
 
 func (this *collection) InsertOneNx(ctx context.Context, filter interface{}, document interface{}) (*UpdateResult, error) {
 	var opts = options.Update().SetUpsert(true)
-	return this.collection.UpdateOne(ctx, filter, bson.M{"$setOnInsert": document}, opts)
+	return this.collection.UpdateOne(ctx, filter, bson.D{{"$setOnInsert", document}}, opts)
 }
 
 func (this *collection) InsertMany(ctx context.Context, documents []interface{}) (*InsertManyResult, error) {
@@ -129,7 +129,7 @@ func (this *collection) Upsert(ctx context.Context, filter interface{}, replacem
 
 func (this *collection) UpsertId(ctx context.Context, id interface{}, replacement interface{}) (*UpdateResult, error) {
 	var opts = options.Replace().SetUpsert(true)
-	return this.collection.ReplaceOne(ctx, bson.M{"_id": id}, replacement, opts)
+	return this.collection.ReplaceOne(ctx, bson.D{{"_id", id}}, replacement, opts)
 }
 
 func (this *collection) UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error) {
@@ -154,7 +154,7 @@ func (this *collection) DeleteOne(ctx context.Context, filter interface{}) (*Del
 
 func (this *collection) DeleteId(ctx context.Context, id interface{}) (*DeleteResult, error) {
 	var opts = options.Delete()
-	return this.collection.DeleteOne(ctx, bson.M{"_id": id}, opts)
+	return this.collection.DeleteOne(ctx, bson.D{{"_id", id}}, opts)
 }
 
 func (this *collection) DeleteMany(ctx context.Context, filter interface{}) (*DeleteResult, error) {
