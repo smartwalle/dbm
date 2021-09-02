@@ -6,14 +6,18 @@ import (
 	"github.com/smartwalle/dbm"
 )
 
+type Base struct {
+	Id       string `bson:"_id"`
+	ServerId int    `bson:"server_id"`
+	UserId   int64  `bson:"user_id"`
+}
+
 type User struct {
-	Id       dbm.ObjectId `bson:"_id,omitempty"`
-	ServerId int          `bson:"server_id"`
-	UserId   int64        `bson:"user_id"`
-	Name     string       `bson:"name"`
-	Age      int          `bson:"age"`
-	Gender   int          `bson:"gender"`
-	Point    int          `bson:"point"`
+	Base   `bson:",inline"`
+	Name   string `bson:"name"`
+	Age    int    `bson:"age"`
+	Gender int    `bson:"gender"`
+	Point  int    `bson:"point"`
 }
 
 func main() {
@@ -27,7 +31,14 @@ func main() {
 	defer client.Close(context.Background())
 
 	var db = client.Database("test")
-	var tUser = db.Collection("user")
+	var tUser = db.Collection("user2")
+
+	var u1 = &User{}
+	u1.Age = 10
+
+	tUser.InsertOne(context.Background(), u1)
+
+	return
 
 	//tUser.Drop(context.Background())
 	//
