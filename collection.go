@@ -108,6 +108,7 @@ func (this *collection) InsertOne(ctx context.Context, document interface{}) (*I
 
 func (this *collection) InsertOneNx(ctx context.Context, filter interface{}, document interface{}) (*UpdateResult, error) {
 	var opts = options.Update().SetUpsert(true)
+	// mongodb update 操作中，当 upsert 为 true 时，如果满足查询条件的记录存在，不会执行 $setOnInsert 中的操作
 	return this.collection.UpdateOne(ctx, filter, bson.D{{"$setOnInsert", document}}, opts)
 }
 
