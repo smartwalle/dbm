@@ -55,11 +55,15 @@ type Bulk interface {
 
 	InsertOneNx(filter interface{}, document interface{}) Bulk
 
+	RepsertOne(filter interface{}, replacement interface{}) Bulk
+
 	ReplaceOne(filter interface{}, replacement interface{}) Bulk
 
-	Upsert(filter interface{}, replacement interface{}) Bulk
+	UpsertOne(filter interface{}, update interface{}) Bulk
 
-	UpsertId(id interface{}, replacement interface{}) Bulk
+	UpsertId(id interface{}, update interface{}) Bulk
+
+	Upsert(filter interface{}, update interface{}) Bulk
 
 	UpdateOne(filter interface{}, update interface{}) Bulk
 
@@ -114,6 +118,14 @@ func (this *bulk) InsertOneNx(filter interface{}, document interface{}) Bulk {
 	return this.AddModel(m)
 }
 
+func (this *bulk) RepsertOne(filter interface{}, replacement interface{}) Bulk {
+	var m = NewReplaceOneModel()
+	m.SetUpsert(true)
+	m.SetFilter(filter)
+	m.SetReplacement(replacement)
+	return this.AddModel(m)
+}
+
 func (this *bulk) ReplaceOne(filter interface{}, replacement interface{}) Bulk {
 	var m = NewReplaceOneModel()
 	m.SetFilter(filter)
@@ -121,16 +133,24 @@ func (this *bulk) ReplaceOne(filter interface{}, replacement interface{}) Bulk {
 	return this.AddModel(m)
 }
 
-func (this *bulk) Upsert(filter interface{}, replacement interface{}) Bulk {
-	var m = NewReplaceOneModel()
-	m.SetFilter(filter)
-	m.SetReplacement(replacement)
+func (this *bulk) UpsertOne(filter interface{}, update interface{}) Bulk {
+	var m = NewUpdateOneModel()
 	m.SetUpsert(true)
+	m.SetFilter(filter)
+	m.SetUpdate(update)
 	return this.AddModel(m)
 }
 
-func (this *bulk) UpsertId(id interface{}, replacement interface{}) Bulk {
-	return this.Upsert(M{"_id": id}, replacement)
+func (this *bulk) UpsertId(id interface{}, update interface{}) Bulk {
+	return this.UpsertOne(M{"_id": id}, update)
+}
+
+func (this *bulk) Upsert(filter interface{}, update interface{}) Bulk {
+	var m = NewUpdateManyModel()
+	m.SetUpsert(true)
+	m.SetFilter(filter)
+	m.SetUpdate(update)
+	return this.AddModel(m)
 }
 
 func (this *bulk) UpdateOne(filter interface{}, update interface{}) Bulk {
