@@ -71,6 +71,10 @@ func NA(items ...interface{}) A {
 	return A(items)
 }
 
+func NR(pattern, options string) Regex {
+	return Regex{Pattern: pattern, Options: options}
+}
+
 func NP(items ...D) Pipeline {
 	return Pipeline(items)
 }
