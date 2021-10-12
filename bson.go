@@ -59,18 +59,18 @@ func NewDecimal128(h, l uint64) Decimal128 {
 	return primitive.NewDecimal128(h, l)
 }
 
-func EE(key string, value interface{}) E {
+func NE(key string, value interface{}) E {
 	return E{Key: key, Value: value}
 }
 
-func DE(items ...E) D {
+func ND(items ...E) D {
 	return D(items)
 }
 
-func AE(items ...interface{}) A {
+func NA(items ...interface{}) A {
 	return A(items)
 }
 
-func NewPipeline(items ...D) Pipeline {
+func NP(items ...D) Pipeline {
 	return Pipeline(items)
 }
