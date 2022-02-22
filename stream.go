@@ -7,6 +7,35 @@ import (
 	"time"
 )
 
+/*
+type UserEvent struct {
+	dbm.ChangeEvent    `bson:",inline"`
+	FullDocument User `bson:"fullDocument"`
+	DocumentKey  struct {
+		Id string `bson:"_id"`
+	} `bson:"documentKey"`
+}
+
+var uEvent *UserEvent
+collection.Watch(context.Background(), dbm.NP()).FullDocument(options.UpdateLookup).Stream().One(&uEvent)
+*/
+
+type ChangeEvent struct {
+	Id            EventId   `bson:"_id"`
+	OperationType string    `bson:"operationType"`
+	ClusterTime   Timestamp `bson:"clusterTime"`
+	Namespace     Namespace `bson:"ns"`
+}
+
+type EventId struct {
+	Data string `bson:"_data"`
+}
+
+type Namespace struct {
+	Database   string `bson:"db"`
+	Collection string `bson:"coll"`
+}
+
 type watcher interface {
 	Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*mongo.ChangeStream, error)
 }
