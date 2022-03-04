@@ -31,7 +31,7 @@ func main() {
 	defer client.Close(context.Background())
 
 	var db = client.Database("test")
-	var tUser = db.Collection("user2")
+	var tUser = db.Collection("user")
 
 	var u1 = &User{}
 	u1.Age = 10
