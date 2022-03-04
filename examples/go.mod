@@ -1,4 +1,4 @@
-module github.com/smartwalle/dbm/cmd
+module github.com/smartwalle/dbm/examples
 
 go 1.16
 
