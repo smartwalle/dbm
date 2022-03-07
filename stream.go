@@ -16,8 +16,11 @@ type UserEvent struct {
 	} `bson:"documentKey"`
 }
 
-var uEvent *UserEvent
-collection.Watch(context.Background(), dbm.NP()).FullDocument(options.UpdateLookup).Stream().One(&uEvent)
+var stream = collection.Watch(context.Background(), dbm.NP()).FullDocument(options.UpdateLookup).Stream()
+for stream.Next(context.Background()) {
+	var uEvent *UserEvent
+	stream.One(&uEvent)
+}
 */
 
 type ChangeEvent struct {
