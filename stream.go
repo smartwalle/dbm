@@ -23,11 +23,21 @@ for stream.Next(context.Background()) {
 }
 */
 
+type OperationType string
+
+const (
+	OperationTypeInsert     = "insert"
+	OperationTypeDelete     = "delete"
+	OperationTypeReplace    = "replace"
+	OperationTypeUpdate     = "update"
+	OperationTypeInvalidate = "invalidate"
+)
+
 type ChangeEvent struct {
-	Id            EventId   `bson:"_id"`
-	OperationType string    `bson:"operationType"`
-	ClusterTime   Timestamp `bson:"clusterTime"`
-	Namespace     Namespace `bson:"ns"`
+	Id            EventId       `bson:"_id"`
+	OperationType OperationType `bson:"operationType"`
+	ClusterTime   Timestamp     `bson:"clusterTime"`
+	Namespace     Namespace     `bson:"ns"`
 }
 
 type EventId struct {
