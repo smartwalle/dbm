@@ -9,5 +9,5 @@ require (
 	github.com/karrick/godirwalk v1.10.3 // indirect
 	github.com/pelletier/go-toml v1.7.0 // indirect
 	github.com/sirupsen/logrus v1.4.2 // indirect
-	go.mongodb.org/mongo-driver v1.8.4
+	go.mongodb.org/mongo-driver v1.9.1
 )
