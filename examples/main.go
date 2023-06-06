@@ -7,9 +7,9 @@ import (
 )
 
 type Base struct {
-	Id       string `bson:"_id"`
-	ServerId int    `bson:"server_id"`
-	UserId   int64  `bson:"user_id"`
+	Id       dbm.ObjectId `bson:"_id"`
+	ServerId int          `bson:"server_id"`
+	UserId   int64        `bson:"user_id"`
 }
 
 type User struct {
@@ -23,7 +23,7 @@ type User struct {
 func main() {
 	var cfg = dbm.NewConfig("mongodb+srv://smartwalle:smartwalle@smartwalle.kbxxd.mongodb.net/?retryWrites=true&w=majority")
 
-	var client, err = dbm.NewClient(context.Background(), cfg)
+	var client, err = dbm.New(context.Background(), cfg)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -34,7 +34,8 @@ func main() {
 	var tUser = db.Collection("user")
 
 	var u1 = &User{}
-	u1.Age = 10
+	u1.Id = dbm.NewObjectId()
+	u1.Age = 11
 
 	tUser.InsertOne(context.Background(), u1)
 

@@ -8,8 +8,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/description"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/ocsp"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/topology"
 	"math"
 	"strconv"
@@ -44,19 +42,19 @@ type Client interface {
 }
 
 type client struct {
-	*info
-	cfg    *Config
-	topo   *topology.Topology
-	client *mongo.Client
+	*serverInfo
+	config   *Config
+	topology *topology.Topology
+	client   *mongo.Client
 }
 
-type info struct {
+type serverInfo struct {
 	version            string
 	transactionAllowed bool
 }
 
-func NewClient(ctx context.Context, cfg *Config) (Client, error) {
-	var topo, err = connectTopology(cfg)
+func New(ctx context.Context, cfg *Config) (Client, error) {
+	var nTopology, err = connectTopology(cfg.ClientOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -70,46 +68,34 @@ func NewClient(ctx context.Context, cfg *Config) (Client, error) {
 		return nil, err
 	}
 
-	sInfo, err := load(ctx, topo, mClient)
+	sInfo, err := loadServerInfo(ctx, nTopology, mClient)
 	if err != nil {
 		return nil, err
 	}
 
 	var nClient = &client{}
-	nClient.info = sInfo
-	nClient.cfg = cfg
-	nClient.topo = topo
+	nClient.serverInfo = sInfo
+	nClient.config = cfg
+	nClient.topology = nTopology
 	nClient.client = mClient
 	return nClient, nil
 }
 
-func connectTopology(cfg *Config) (*topology.Topology, error) {
-	connectionOpts := []topology.ConnectionOption{
-		topology.WithOCSPCache(func(ocsp.Cache) ocsp.Cache {
-			return ocsp.NewCache()
-		}),
-	}
-	serverOpts := []topology.ServerOption{
-		topology.WithConnectionOptions(func(opts ...topology.ConnectionOption) []topology.ConnectionOption {
-			return append(opts, connectionOpts...)
-		}),
-	}
-
-	var topo, err = topology.New(topology.WithConnString(func(connString connstring.ConnString) connstring.ConnString {
-		var connStr, _ = connstring.ParseAndValidate(cfg.GetURI())
-		return connStr
-	}), topology.WithServerOptions(func(option ...topology.ServerOption) []topology.ServerOption {
-		return append(option, serverOpts...)
-	}))
-
+func connectTopology(opts *options.ClientOptions) (*topology.Topology, error) {
+	cfg, err := topology.NewConfig(opts, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = topo.Connect(); err != nil {
+	nTopology, err := topology.New(cfg)
+	if err != nil {
 		return nil, err
 	}
-	return topo, nil
+
+	if err = nTopology.Connect(); err != nil {
+		return nil, err
+	}
+	return nTopology, nil
 }
 
 func connect(ctx context.Context, opts *options.ClientOptions) (*mongo.Client, error) {
@@ -127,7 +113,7 @@ func connect(ctx context.Context, opts *options.ClientOptions) (*mongo.Client, e
 	return nClient, nil
 }
 
-func load(ctx context.Context, topo *topology.Topology, client *mongo.Client) (*info, error) {
+func loadServerInfo(ctx context.Context, topo *topology.Topology, client *mongo.Client) (*serverInfo, error) {
 	// 获取服务器状态
 	status, err := serverStatus(ctx, client)
 	if err != nil {
@@ -141,10 +127,10 @@ func load(ctx context.Context, topo *topology.Topology, client *mongo.Client) (*
 	}
 	var version = value.StringValue()
 
-	var sInfo = &info{}
-	sInfo.version = version
-	sInfo.transactionAllowed = topo.Kind() != description.Single && CompareServerVersions(sInfo.version, "4.0.0") > 0
-	return sInfo, nil
+	var info = &serverInfo{}
+	info.version = version
+	info.transactionAllowed = topo.Kind() != description.Single && CompareServerVersions(info.version, "4.0.0") > 0
+	return info, nil
 }
 
 func serverStatus(ctx context.Context, client *mongo.Client) (bson.Raw, error) {
@@ -160,7 +146,7 @@ func (this *client) Client() *mongo.Client {
 }
 
 func (this *client) Registry() *bsoncodec.Registry {
-	return this.cfg.Registry
+	return this.config.Registry
 }
 
 func (this *client) Close(ctx context.Context) error {
@@ -188,19 +174,20 @@ func (this *client) Database(name string) Database {
 }
 
 // WithTransaction
-// var client, _ = dbm.NewClient(...)
+// var client, _ = dbm.New(...)
 // var db = client.Database("xx")
 // var c1 = db.Collection("c1")
 // var c2 = db.Collection("c2")
-// db.WithTransaction(context.Background(), func(sCtx SessionContext) (interface{}, error) {
-//		if _, sErr := c1.Insert(sCtx, ...); sErr != nil {
-//			return nil, sErr
-//		}
-//		if _, sErr := c2.Insert(sCtx, ...); sErr != nil {
-//			return nil, sErr
-//		}
-//		return nil, nil
-// }
+//
+//	db.WithTransaction(context.Background(), func(sCtx SessionContext) (interface{}, error) {
+//			if _, sErr := c1.Insert(sCtx, ...); sErr != nil {
+//				return nil, sErr
+//			}
+//			if _, sErr := c2.Insert(sCtx, ...); sErr != nil {
+//				return nil, sErr
+//			}
+//			return nil, nil
+//	}
 func (this *client) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
 	var sess, err = this.StartSession(ctx)
 	if err != nil {
@@ -211,24 +198,25 @@ func (this *client) WithTransaction(ctx context.Context, fn func(sCtx SessionCon
 }
 
 // UseSession
-// var client, _ = dbm.NewClient(...)
+// var client, _ = dbm.New(...)
 // var db = client.Database("xx")
 // var c1 = db.Collection("c1")
 // var c2 = db.Collection("c2")
-// db.UseSession(context.Background(), func(sess dbm.Session) error {
-// 		if sErr := sess.StartTransaction(); sErr != nil {
-//			return sErr
-//		}
-//		if _, sErr := c1.Insert(sess, ...); sErr != nil {
-//			sess.AbortTransaction(context.Background())
-//			return nil, sErr
-//		}
-//		if _, sErr := c2.Insert(sess, ...); sErr != nil {
-//			sess.AbortTransaction(context.Background())
-//			return nil, sErr
-//		}
-// 		return sess.CommitTransaction(context.Background())
-// })
+//
+//	db.UseSession(context.Background(), func(sess dbm.Session) error {
+//			if sErr := sess.StartTransaction(); sErr != nil {
+//				return sErr
+//			}
+//			if _, sErr := c1.Insert(sess, ...); sErr != nil {
+//				sess.AbortTransaction(context.Background())
+//				return nil, sErr
+//			}
+//			if _, sErr := c2.Insert(sess, ...); sErr != nil {
+//				sess.AbortTransaction(context.Background())
+//				return nil, sErr
+//			}
+//			return sess.CommitTransaction(context.Background())
+//	})
 func (this *client) UseSession(ctx context.Context, fn func(sess Session) error) error {
 	if this.transactionAllowed == false {
 		return ErrSessionNotSupported
@@ -241,23 +229,27 @@ func (this *client) UseSession(ctx context.Context, fn func(sess Session) error)
 }
 
 // StartSession
-// var client, _ = dbm.NewClient(...)
+// var client, _ = dbm.New(...)
 // var db = client.Database("xx")
 // var c1 = db.Collection("c1")
 // var c2 = db.Collection("c2")
 // var sess, _ = db.StartSession(context.Background())
 // defer sess.EndSession(context.Background())
-// if sErr := sess.StartTransaction(); sErr != nil {
-// 		return
-// }
-// if _, sErr := c1.Insert(sess, ...); sErr != nil {
-//		sess.AbortTransaction(context.Background())
-// 		return sErr
-// }
-// if _, sErr := c2.Insert(sess, ...); sErr != nil {
-//		sess.AbortTransaction(context.Background())
-// 		return sErr
-// }
+//
+//	if sErr := sess.StartTransaction(); sErr != nil {
+//			return
+//	}
+//
+//	if _, sErr := c1.Insert(sess, ...); sErr != nil {
+//			sess.AbortTransaction(context.Background())
+//			return sErr
+//	}
+//
+//	if _, sErr := c2.Insert(sess, ...); sErr != nil {
+//			sess.AbortTransaction(context.Background())
+//			return sErr
+//	}
+//
 // sess.CommitTransaction(context.Background())
 func (this *client) StartSession(ctx context.Context) (Session, error) {
 	if this.transactionAllowed == false {
