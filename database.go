@@ -6,6 +6,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type DatabaseOptions = options.DatabaseOptions
+
+func NewDatabaseOptions() *DatabaseOptions {
+	return options.Database()
+}
+
 type Database interface {
 	Client() Client
 
@@ -15,7 +21,7 @@ type Database interface {
 
 	Drop(ctx context.Context) error
 
-	Collection(name string) Collection
+	Collection(name string, opts ...*CollectionOptions) Collection
 
 	WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error)
 
@@ -47,8 +53,8 @@ func (this *database) Drop(ctx context.Context) error {
 	return this.database.Drop(ctx)
 }
 
-func (this *database) Collection(name string) Collection {
-	return &collection{collection: this.database.Collection(name), database: this}
+func (this *database) Collection(name string, opts ...*CollectionOptions) Collection {
+	return &collection{collection: this.database.Collection(name, opts...), database: this}
 }
 
 func (this *database) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {

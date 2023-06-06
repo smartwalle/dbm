@@ -7,6 +7,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type CollectionOptions = options.CollectionOptions
+
+func NewCollectionOptions() *CollectionOptions {
+	return options.Collection()
+}
+
 type Collection interface {
 	Database() Database
 
@@ -16,7 +22,7 @@ type Collection interface {
 
 	Drop(ctx context.Context) error
 
-	Clone() (Collection, error)
+	Clone(opts ...*CollectionOptions) (Collection, error)
 
 	IndexView() IndexView
 
@@ -88,8 +94,8 @@ func (this *collection) Drop(ctx context.Context) error {
 	return this.collection.Drop(ctx)
 }
 
-func (this *collection) Clone() (Collection, error) {
-	var nCollection, err = this.collection.Clone()
+func (this *collection) Clone(opts ...*CollectionOptions) (Collection, error) {
+	var nCollection, err = this.collection.Clone(opts...)
 	if err != nil {
 		return nil, err
 	}

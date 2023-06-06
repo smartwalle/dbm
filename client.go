@@ -30,7 +30,7 @@ type Client interface {
 
 	TransactionAllowed() bool
 
-	Database(name string) Database
+	Database(name string, opts ...*DatabaseOptions) Database
 
 	WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error)
 
@@ -169,14 +169,18 @@ func (this *client) TransactionAllowed() bool {
 	return this.transactionAllowed
 }
 
-func (this *client) Database(name string) Database {
-	return &database{database: this.client.Database(name), client: this}
+func (this *client) Database(name string, opts ...*DatabaseOptions) Database {
+	return &database{database: this.client.Database(name, opts...), client: this}
 }
 
 // WithTransaction
+//
 // var client, _ = dbm.New(...)
+//
 // var db = client.Database("xx")
+//
 // var c1 = db.Collection("c1")
+//
 // var c2 = db.Collection("c2")
 //
 //	db.WithTransaction(context.Background(), func(sCtx SessionContext) (interface{}, error) {
@@ -198,9 +202,13 @@ func (this *client) WithTransaction(ctx context.Context, fn func(sCtx SessionCon
 }
 
 // UseSession
+//
 // var client, _ = dbm.New(...)
+//
 // var db = client.Database("xx")
+//
 // var c1 = db.Collection("c1")
+//
 // var c2 = db.Collection("c2")
 //
 //	db.UseSession(context.Background(), func(sess dbm.Session) error {
@@ -229,11 +237,17 @@ func (this *client) UseSession(ctx context.Context, fn func(sess Session) error)
 }
 
 // StartSession
+//
 // var client, _ = dbm.New(...)
+//
 // var db = client.Database("xx")
+//
 // var c1 = db.Collection("c1")
+//
 // var c2 = db.Collection("c2")
+//
 // var sess, _ = db.StartSession(context.Background())
+//
 // defer sess.EndSession(context.Background())
 //
 //	if sErr := sess.StartTransaction(); sErr != nil {

@@ -8,7 +8,7 @@ import (
 
 type TransactionOptions = options.TransactionOptions
 
-func Transaction() *TransactionOptions {
+func NewTransactionOptions() *TransactionOptions {
 	return options.Transaction()
 }
 
