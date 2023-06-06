@@ -13,6 +13,36 @@ func NewCollectionOptions() *CollectionOptions {
 	return options.Collection()
 }
 
+type InsertOneOptions = options.InsertOneOptions
+
+func NewInsertOneOptions() *InsertOneOptions {
+	return options.InsertOne()
+}
+
+type InsertManyOptions = options.InsertManyOptions
+
+func NewInsertManyOptions() *InsertManyOptions {
+	return options.InsertMany()
+}
+
+type UpdateOptions = options.UpdateOptions
+
+func NewUpdateOptions() *UpdateOptions {
+	return options.Update()
+}
+
+type ReplaceOptions = options.ReplaceOptions
+
+func NewReplaceOptions() *ReplaceOptions {
+	return options.Replace()
+}
+
+type DeleteOptions = options.DeleteOptions
+
+func NewDeleteOptions() *DeleteOptions {
+	return options.Delete()
+}
+
 type Collection interface {
 	Database() Database
 
@@ -26,35 +56,35 @@ type Collection interface {
 
 	IndexView() IndexView
 
-	InsertOne(ctx context.Context, document interface{}) (*InsertOneResult, error)
+	InsertOne(ctx context.Context, document interface{}, opts ...*InsertOneOptions) (*InsertOneResult, error)
 
-	InsertOneNx(ctx context.Context, filter interface{}, document interface{}) (*UpdateResult, error)
+	InsertOneNx(ctx context.Context, filter interface{}, document interface{}, opts ...*UpdateOptions) (*UpdateResult, error)
 
-	InsertMany(ctx context.Context, documents []interface{}) (*InsertManyResult, error)
+	InsertMany(ctx context.Context, documents []interface{}, opts ...*InsertManyOptions) (*InsertManyResult, error)
 
 	Insert(ctx context.Context, documents ...interface{}) (*InsertManyResult, error)
 
-	RepsertOne(ctx context.Context, filter interface{}, replacement interface{}) (*UpdateResult, error)
+	RepsertOne(ctx context.Context, filter interface{}, replacement interface{}, opts ...*ReplaceOptions) (*UpdateResult, error)
 
-	ReplaceOne(ctx context.Context, filter interface{}, replacement interface{}) (*UpdateResult, error)
+	ReplaceOne(ctx context.Context, filter interface{}, replacement interface{}, opts ...*ReplaceOptions) (*UpdateResult, error)
 
-	UpsertOne(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error)
+	UpsertOne(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error)
 
-	UpsertId(ctx context.Context, id interface{}, update interface{}) (*UpdateResult, error)
+	UpsertId(ctx context.Context, id interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error)
 
-	Upsert(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error)
+	Upsert(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error)
 
-	UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error)
+	UpdateOne(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error)
 
-	UpdateId(ctx context.Context, id interface{}, update interface{}) (*UpdateResult, error)
+	UpdateId(ctx context.Context, id interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error)
 
-	UpdateMany(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error)
+	UpdateMany(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error)
 
-	DeleteOne(ctx context.Context, filter interface{}) (*DeleteResult, error)
+	DeleteOne(ctx context.Context, filter interface{}, opts ...*DeleteOptions) (*DeleteResult, error)
 
-	DeleteId(ctx context.Context, id interface{}) (*DeleteResult, error)
+	DeleteId(ctx context.Context, id interface{}, opts ...*DeleteOptions) (*DeleteResult, error)
 
-	DeleteMany(ctx context.Context, filter interface{}) (*DeleteResult, error)
+	DeleteMany(ctx context.Context, filter interface{}, opts ...*DeleteOptions) (*DeleteResult, error)
 
 	Find(ctx context.Context, filter interface{}) Query
 
@@ -107,20 +137,19 @@ func (this *collection) IndexView() IndexView {
 	return &indexView{view: view}
 }
 
-func (this *collection) InsertOne(ctx context.Context, document interface{}) (*InsertOneResult, error) {
-	var opts = options.InsertOne()
-	return this.collection.InsertOne(ctx, document, opts)
+func (this *collection) InsertOne(ctx context.Context, document interface{}, opts ...*InsertOneOptions) (*InsertOneResult, error) {
+	return this.collection.InsertOne(ctx, document, opts...)
 }
 
-func (this *collection) InsertOneNx(ctx context.Context, filter interface{}, document interface{}) (*UpdateResult, error) {
-	var opts = options.Update().SetUpsert(true)
+func (this *collection) InsertOneNx(ctx context.Context, filter interface{}, document interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
+	var opt = options.MergeUpdateOptions(opts...)
+	opt.SetUpsert(true)
 	// mongodb update 操作中，当 upsert 为 true 时，如果满足查询条件的记录存在，不会执行 $setOnInsert 中的操作
-	return this.collection.UpdateOne(ctx, filter, bson.D{{"$setOnInsert", document}}, opts)
+	return this.collection.UpdateOne(ctx, filter, bson.D{{"$setOnInsert", document}}, opt)
 }
 
-func (this *collection) InsertMany(ctx context.Context, documents []interface{}) (*InsertManyResult, error) {
-	var opts = options.InsertMany()
-	return this.collection.InsertMany(ctx, documents, opts)
+func (this *collection) InsertMany(ctx context.Context, documents []interface{}, opts ...*InsertManyOptions) (*InsertManyResult, error) {
+	return this.collection.InsertMany(ctx, documents, opts...)
 }
 
 func (this *collection) Insert(ctx context.Context, documents ...interface{}) (*InsertManyResult, error) {
@@ -128,59 +157,56 @@ func (this *collection) Insert(ctx context.Context, documents ...interface{}) (*
 	return this.collection.InsertMany(ctx, documents, opts)
 }
 
-func (this *collection) RepsertOne(ctx context.Context, filter interface{}, replacement interface{}) (*UpdateResult, error) {
-	var opts = options.Replace().SetUpsert(true)
-	return this.collection.ReplaceOne(ctx, filter, replacement, opts)
+func (this *collection) RepsertOne(ctx context.Context, filter interface{}, replacement interface{}, opts ...*ReplaceOptions) (*UpdateResult, error) {
+	var opt = options.MergeReplaceOptions(opts...)
+	opt.SetUpsert(true)
+	return this.collection.ReplaceOne(ctx, filter, replacement, opt)
 }
 
-func (this *collection) ReplaceOne(ctx context.Context, filter interface{}, replacement interface{}) (*UpdateResult, error) {
-	var opts = options.Replace()
-	return this.collection.ReplaceOne(ctx, filter, replacement, opts)
+func (this *collection) ReplaceOne(ctx context.Context, filter interface{}, replacement interface{}, opts ...*ReplaceOptions) (*UpdateResult, error) {
+	return this.collection.ReplaceOne(ctx, filter, replacement, opts...)
 }
 
-func (this *collection) UpsertOne(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error) {
-	var opts = options.Update().SetUpsert(true)
-	return this.collection.UpdateOne(ctx, filter, update, opts)
+func (this *collection) UpsertOne(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
+	var opt = options.MergeUpdateOptions(opts...)
+	opt.SetUpsert(true)
+	return this.collection.UpdateOne(ctx, filter, update, opt)
 }
 
-func (this *collection) UpsertId(ctx context.Context, id interface{}, update interface{}) (*UpdateResult, error) {
-	var opts = options.Update().SetUpsert(true)
-	return this.collection.UpdateOne(ctx, bson.D{{"_id", id}}, update, opts)
+func (this *collection) UpsertId(ctx context.Context, id interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
+	var opt = options.MergeUpdateOptions(opts...)
+	opt.SetUpsert(true)
+	return this.collection.UpdateOne(ctx, bson.D{{"_id", id}}, update, opt)
 }
 
-func (this *collection) Upsert(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error) {
-	var opts = options.Update().SetUpsert(true)
-	return this.collection.UpdateMany(ctx, filter, update, opts)
+func (this *collection) Upsert(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
+	var opt = options.MergeUpdateOptions(opts...)
+	opt.SetUpsert(true)
+	return this.collection.UpdateMany(ctx, filter, update, opt)
 }
 
-func (this *collection) UpdateOne(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error) {
-	var opts = options.Update()
-	return this.collection.UpdateOne(ctx, filter, update, opts)
+func (this *collection) UpdateOne(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
+	return this.collection.UpdateOne(ctx, filter, update, opts...)
 }
 
-func (this *collection) UpdateId(ctx context.Context, id interface{}, update interface{}) (*UpdateResult, error) {
-	var opts = options.Update()
-	return this.collection.UpdateByID(ctx, id, update, opts)
+func (this *collection) UpdateId(ctx context.Context, id interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
+	return this.collection.UpdateByID(ctx, id, update, opts...)
 }
 
-func (this *collection) UpdateMany(ctx context.Context, filter interface{}, update interface{}) (*UpdateResult, error) {
-	var opts = options.Update()
-	return this.collection.UpdateMany(ctx, filter, update, opts)
+func (this *collection) UpdateMany(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
+	return this.collection.UpdateMany(ctx, filter, update, opts...)
 }
 
-func (this *collection) DeleteOne(ctx context.Context, filter interface{}) (*DeleteResult, error) {
-	var opts = options.Delete()
-	return this.collection.DeleteOne(ctx, filter, opts)
+func (this *collection) DeleteOne(ctx context.Context, filter interface{}, opts ...*DeleteOptions) (*DeleteResult, error) {
+	return this.collection.DeleteOne(ctx, filter, opts...)
 }
 
-func (this *collection) DeleteId(ctx context.Context, id interface{}) (*DeleteResult, error) {
-	var opts = options.Delete()
-	return this.collection.DeleteOne(ctx, bson.D{{"_id", id}}, opts)
+func (this *collection) DeleteId(ctx context.Context, id interface{}, opts ...*DeleteOptions) (*DeleteResult, error) {
+	return this.collection.DeleteOne(ctx, bson.D{{"_id", id}}, opts...)
 }
 
-func (this *collection) DeleteMany(ctx context.Context, filter interface{}) (*DeleteResult, error) {
-	var opts = options.Delete()
-	return this.collection.DeleteMany(ctx, filter, opts)
+func (this *collection) DeleteMany(ctx context.Context, filter interface{}, opts ...*DeleteOptions) (*DeleteResult, error) {
+	return this.collection.DeleteMany(ctx, filter, opts...)
 }
 
 func (this *collection) Find(ctx context.Context, filter interface{}) Query {
