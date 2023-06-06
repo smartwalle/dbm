@@ -6,6 +6,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type SessionOptions = options.SessionOptions
+
+func NewSessionOptions() *SessionOptions {
+	return options.Session()
+}
+
 type TransactionOptions = options.TransactionOptions
 
 func NewTransactionOptions() *TransactionOptions {

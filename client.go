@@ -36,7 +36,9 @@ type Client interface {
 
 	UseSession(ctx context.Context, fn func(sess Session) error) error
 
-	StartSession(ctx context.Context) (Session, error)
+	UseSessionWithOptions(ctx context.Context, opts *SessionOptions, fn func(sess Session) error) error
+
+	StartSession(ctx context.Context, opts ...*SessionOptions) (Session, error)
 
 	Watch(ctx context.Context, pipeline interface{}) Watcher
 }
@@ -226,10 +228,22 @@ func (this *client) WithTransaction(ctx context.Context, fn func(sCtx SessionCon
 //			return sess.CommitTransaction(context.Background())
 //	})
 func (this *client) UseSession(ctx context.Context, fn func(sess Session) error) error {
-	if this.transactionAllowed == false {
+	if !this.transactionAllowed {
 		return ErrSessionNotSupported
 	}
 	return this.client.UseSession(ctx, func(sCtx mongo.SessionContext) error {
+		var s = &session{}
+		s.SessionContext = sCtx
+		return fn(s)
+	})
+}
+
+func (this *client) UseSessionWithOptions(ctx context.Context, opts *SessionOptions, fn func(sess Session) error) error {
+	if !this.transactionAllowed {
+		return ErrSessionNotSupported
+	}
+
+	return this.client.UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {
 		var s = &session{}
 		s.SessionContext = sCtx
 		return fn(s)
@@ -265,12 +279,12 @@ func (this *client) UseSession(ctx context.Context, fn func(sess Session) error)
 //	}
 //
 // sess.CommitTransaction(context.Background())
-func (this *client) StartSession(ctx context.Context) (Session, error) {
-	if this.transactionAllowed == false {
+func (this *client) StartSession(ctx context.Context, opts ...*SessionOptions) (Session, error) {
+	if !this.transactionAllowed {
 		return nil, ErrSessionNotSupported
 	}
 
-	var sess, err = this.client.StartSession()
+	var sess, err = this.client.StartSession(opts...)
 	if err != nil {
 		return nil, err
 	}

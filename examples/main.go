@@ -37,7 +37,7 @@ func main() {
 	u1.Id = dbm.NewObjectId()
 	u1.Age = 11
 
-	tUser.InsertOne(context.Background(), u1)
+	fmt.Println(tUser.InsertOne(context.Background(), u1))
 
 	return
 

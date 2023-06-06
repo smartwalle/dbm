@@ -27,7 +27,9 @@ type Database interface {
 
 	UseSession(ctx context.Context, fn func(sess Session) error) error
 
-	StartSession(ctx context.Context) (Session, error)
+	UseSessionWithOptions(ctx context.Context, opts *SessionOptions, fn func(sess Session) error) error
+
+	StartSession(ctx context.Context, opts ...*SessionOptions) (Session, error)
 
 	Watch(ctx context.Context, pipeline interface{}) Watcher
 }
@@ -65,8 +67,12 @@ func (this *database) UseSession(ctx context.Context, fn func(sess Session) erro
 	return this.client.UseSession(ctx, fn)
 }
 
-func (this *database) StartSession(ctx context.Context) (Session, error) {
-	return this.client.StartSession(ctx)
+func (this *database) UseSessionWithOptions(ctx context.Context, opts *SessionOptions, fn func(sess Session) error) error {
+	return this.client.UseSessionWithOptions(ctx, opts, fn)
+}
+
+func (this *database) StartSession(ctx context.Context, opts ...*SessionOptions) (Session, error) {
+	return this.client.StartSession(ctx, opts...)
 }
 
 func (this *database) Aggregate(ctx context.Context, pipeline interface{}) Aggregate {
