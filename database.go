@@ -39,56 +39,56 @@ type database struct {
 	client   Client
 }
 
-func (this *database) Client() Client {
-	return this.client
+func (db *database) Client() Client {
+	return db.client
 }
 
-func (this *database) Database() *mongo.Database {
-	return this.database
+func (db *database) Database() *mongo.Database {
+	return db.database
 }
 
-func (this *database) Name() string {
-	return this.database.Name()
+func (db *database) Name() string {
+	return db.database.Name()
 }
 
-func (this *database) Drop(ctx context.Context) error {
-	return this.database.Drop(ctx)
+func (db *database) Drop(ctx context.Context) error {
+	return db.database.Drop(ctx)
 }
 
-func (this *database) Collection(name string, opts ...*CollectionOptions) Collection {
-	return &collection{collection: this.database.Collection(name, opts...), database: this}
+func (db *database) Collection(name string, opts ...*CollectionOptions) Collection {
+	return &collection{collection: db.database.Collection(name, opts...), database: db}
 }
 
-func (this *database) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
-	return this.client.WithTransaction(ctx, fn, opts...)
+func (db *database) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
+	return db.client.WithTransaction(ctx, fn, opts...)
 }
 
-func (this *database) UseSession(ctx context.Context, fn func(sess Session) error) error {
-	return this.client.UseSession(ctx, fn)
+func (db *database) UseSession(ctx context.Context, fn func(sess Session) error) error {
+	return db.client.UseSession(ctx, fn)
 }
 
-func (this *database) UseSessionWithOptions(ctx context.Context, opts *SessionOptions, fn func(sess Session) error) error {
-	return this.client.UseSessionWithOptions(ctx, opts, fn)
+func (db *database) UseSessionWithOptions(ctx context.Context, opts *SessionOptions, fn func(sess Session) error) error {
+	return db.client.UseSessionWithOptions(ctx, opts, fn)
 }
 
-func (this *database) StartSession(ctx context.Context, opts ...*SessionOptions) (Session, error) {
-	return this.client.StartSession(ctx, opts...)
+func (db *database) StartSession(ctx context.Context, opts ...*SessionOptions) (Session, error) {
+	return db.client.StartSession(ctx, opts...)
 }
 
-func (this *database) Aggregate(ctx context.Context, pipeline interface{}) Aggregate {
+func (db *database) Aggregate(ctx context.Context, pipeline interface{}) Aggregate {
 	var a = &aggregate{}
 	a.pipeline = pipeline
 	a.ctx = ctx
 	a.opts = options.Aggregate()
-	a.aggregator = this.database
+	a.aggregator = db.database
 	return a
 }
 
-func (this *database) Watch(ctx context.Context, pipeline interface{}) Watcher {
+func (db *database) Watch(ctx context.Context, pipeline interface{}) Watcher {
 	var w = &watch{}
 	w.pipeline = pipeline
 	w.ctx = ctx
 	w.opts = options.ChangeStream()
-	w.watcher = this.database
+	w.watcher = db.database
 	return w
 }

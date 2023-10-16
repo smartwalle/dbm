@@ -87,107 +87,107 @@ type bulk struct {
 	collection Collection
 }
 
-func (this *bulk) Ordered(ordered bool) Bulk {
-	this.opts.SetOrdered(ordered)
-	return this
+func (b *bulk) Ordered(ordered bool) Bulk {
+	b.opts.SetOrdered(ordered)
+	return b
 }
 
-func (this *bulk) BypassDocumentValidation(bypass bool) Bulk {
-	this.opts.SetBypassDocumentValidation(bypass)
-	return this
+func (b *bulk) BypassDocumentValidation(bypass bool) Bulk {
+	b.opts.SetBypassDocumentValidation(bypass)
+	return b
 }
 
-func (this *bulk) AddModel(m WriteModel) Bulk {
+func (b *bulk) AddModel(m WriteModel) Bulk {
 	if m != nil {
-		this.models = append(this.models, m)
+		b.models = append(b.models, m)
 	}
-	return this
+	return b
 }
 
-func (this *bulk) InsertOne(document interface{}) Bulk {
+func (b *bulk) InsertOne(document interface{}) Bulk {
 	var m = NewInsertOneModel()
 	m.SetDocument(document)
-	return this.AddModel(m)
+	return b.AddModel(m)
 }
 
-func (this *bulk) InsertOneNx(filter interface{}, document interface{}) Bulk {
+func (b *bulk) InsertOneNx(filter interface{}, document interface{}) Bulk {
 	var m = NewUpdateOneModel()
 	m.SetUpsert(true)
 	m.SetFilter(filter)
 	m.SetUpdate(M{"$setOnInsert": document})
-	return this.AddModel(m)
+	return b.AddModel(m)
 }
 
-func (this *bulk) RepsertOne(filter interface{}, replacement interface{}) Bulk {
+func (b *bulk) RepsertOne(filter interface{}, replacement interface{}) Bulk {
 	var m = NewReplaceOneModel()
 	m.SetUpsert(true)
 	m.SetFilter(filter)
 	m.SetReplacement(replacement)
-	return this.AddModel(m)
+	return b.AddModel(m)
 }
 
-func (this *bulk) ReplaceOne(filter interface{}, replacement interface{}) Bulk {
+func (b *bulk) ReplaceOne(filter interface{}, replacement interface{}) Bulk {
 	var m = NewReplaceOneModel()
 	m.SetFilter(filter)
 	m.SetReplacement(replacement)
-	return this.AddModel(m)
+	return b.AddModel(m)
 }
 
-func (this *bulk) UpsertOne(filter interface{}, update interface{}) Bulk {
+func (b *bulk) UpsertOne(filter interface{}, update interface{}) Bulk {
 	var m = NewUpdateOneModel()
 	m.SetUpsert(true)
 	m.SetFilter(filter)
 	m.SetUpdate(update)
-	return this.AddModel(m)
+	return b.AddModel(m)
 }
 
-func (this *bulk) UpsertId(id interface{}, update interface{}) Bulk {
-	return this.UpsertOne(M{"_id": id}, update)
+func (b *bulk) UpsertId(id interface{}, update interface{}) Bulk {
+	return b.UpsertOne(M{"_id": id}, update)
 }
 
-func (this *bulk) Upsert(filter interface{}, update interface{}) Bulk {
+func (b *bulk) Upsert(filter interface{}, update interface{}) Bulk {
 	var m = NewUpdateManyModel()
 	m.SetUpsert(true)
 	m.SetFilter(filter)
 	m.SetUpdate(update)
-	return this.AddModel(m)
+	return b.AddModel(m)
 }
 
-func (this *bulk) UpdateOne(filter interface{}, update interface{}) Bulk {
+func (b *bulk) UpdateOne(filter interface{}, update interface{}) Bulk {
 	var m = NewUpdateOneModel()
 	m.SetFilter(filter)
 	m.SetUpdate(update)
-	return this.AddModel(m)
+	return b.AddModel(m)
 }
 
-func (this *bulk) UpdateId(id interface{}, update interface{}) Bulk {
-	return this.UpdateOne(M{"_id": id}, update)
+func (b *bulk) UpdateId(id interface{}, update interface{}) Bulk {
+	return b.UpdateOne(M{"_id": id}, update)
 }
 
-func (this *bulk) UpdateMany(filter interface{}, update interface{}) Bulk {
+func (b *bulk) UpdateMany(filter interface{}, update interface{}) Bulk {
 	var m = NewUpdateManyModel()
 	m.SetFilter(filter)
 	m.SetUpdate(update)
-	return this.AddModel(m)
+	return b.AddModel(m)
 }
 
-func (this *bulk) DeleteOne(filter interface{}) Bulk {
+func (b *bulk) DeleteOne(filter interface{}) Bulk {
 	var m = NewDeleteOneModel()
 	m.SetFilter(filter)
-	return this.AddModel(m)
+	return b.AddModel(m)
 }
 
-func (this *bulk) DeleteId(id interface{}) Bulk {
-	return this.DeleteOne(M{"_id": id})
+func (b *bulk) DeleteId(id interface{}) Bulk {
+	return b.DeleteOne(M{"_id": id})
 }
 
-func (this *bulk) DeleteMany(filter interface{}) Bulk {
+func (b *bulk) DeleteMany(filter interface{}) Bulk {
 	var m = NewDeleteManyModel()
 	m.SetFilter(filter)
-	return this.AddModel(m)
+	return b.AddModel(m)
 }
 
-func (this *bulk) Apply() (*BulkResult, error) {
-	var result, err = this.collection.Collection().BulkWrite(this.ctx, this.models, this.opts)
+func (b *bulk) Apply() (*BulkResult, error) {
+	var result, err = b.collection.Collection().BulkWrite(b.ctx, b.models, b.opts)
 	return result, err
 }

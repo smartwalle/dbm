@@ -28,58 +28,58 @@ type cursor struct {
 	err error
 }
 
-func (this *cursor) ID() int64 {
-	if this.err != nil {
+func (c *cursor) ID() int64 {
+	if c.err != nil {
 		return 0
 	}
-	return this.Cursor.ID()
+	return c.Cursor.ID()
 }
 
-func (this *cursor) Next(ctx context.Context) bool {
-	if this.err != nil {
+func (c *cursor) Next(ctx context.Context) bool {
+	if c.err != nil {
 		return false
 	}
-	return this.Cursor.Next(ctx)
+	return c.Cursor.Next(ctx)
 }
 
-func (this *cursor) TryNext(ctx context.Context) bool {
-	if this.err != nil {
+func (c *cursor) TryNext(ctx context.Context) bool {
+	if c.err != nil {
 		return false
 	}
-	return this.Cursor.TryNext(ctx)
+	return c.Cursor.TryNext(ctx)
 }
 
-func (this *cursor) One(result interface{}) error {
-	if this.err != nil {
-		return this.err
+func (c *cursor) One(result interface{}) error {
+	if c.err != nil {
+		return c.err
 	}
-	return this.Cursor.Decode(result)
+	return c.Cursor.Decode(result)
 }
 
-func (this *cursor) All(ctx context.Context, result interface{}) error {
-	if this.err != nil {
-		return this.err
+func (c *cursor) All(ctx context.Context, result interface{}) error {
+	if c.err != nil {
+		return c.err
 	}
-	return this.Cursor.All(ctx, result)
+	return c.Cursor.All(ctx, result)
 }
 
-func (this *cursor) RemainingBatchLength() int {
-	if this.err != nil {
+func (c *cursor) RemainingBatchLength() int {
+	if c.err != nil {
 		return 0
 	}
-	return this.Cursor.RemainingBatchLength()
+	return c.Cursor.RemainingBatchLength()
 }
 
-func (this *cursor) Close(ctx context.Context) error {
-	if this.err != nil {
-		return this.err
+func (c *cursor) Close(ctx context.Context) error {
+	if c.err != nil {
+		return c.err
 	}
-	return this.Cursor.Close(ctx)
+	return c.Cursor.Close(ctx)
 }
 
-func (this *cursor) Error() error {
-	if this.err != nil {
-		return this.err
+func (c *cursor) Error() error {
+	if c.err != nil {
+		return c.err
 	}
-	return this.Cursor.Err()
+	return c.Cursor.Err()
 }

@@ -43,62 +43,62 @@ type aggregate struct {
 	aggregator aggregator
 }
 
-func (this *aggregate) AllowDiskUse(b bool) Aggregate {
-	this.opts.SetAllowDiskUse(b)
-	return this
+func (ag *aggregate) AllowDiskUse(b bool) Aggregate {
+	ag.opts.SetAllowDiskUse(b)
+	return ag
 }
 
-func (this *aggregate) BatchSize(n int32) Aggregate {
-	this.opts.SetBatchSize(n)
-	return this
+func (ag *aggregate) BatchSize(n int32) Aggregate {
+	ag.opts.SetBatchSize(n)
+	return ag
 }
 
-func (this *aggregate) BypassDocumentValidation(b bool) Aggregate {
-	this.opts.SetBypassDocumentValidation(b)
-	return this
+func (ag *aggregate) BypassDocumentValidation(b bool) Aggregate {
+	ag.opts.SetBypassDocumentValidation(b)
+	return ag
 }
 
-func (this *aggregate) Collation(c *Collation) Aggregate {
-	this.opts.SetCollation(c)
-	return this
+func (ag *aggregate) Collation(c *Collation) Aggregate {
+	ag.opts.SetCollation(c)
+	return ag
 }
 
-func (this *aggregate) Comment(s string) Aggregate {
-	this.opts.SetComment(s)
-	return this
+func (ag *aggregate) Comment(s string) Aggregate {
+	ag.opts.SetComment(s)
+	return ag
 }
 
-func (this *aggregate) Hint(hint interface{}) Aggregate {
-	this.opts.SetHint(hint)
-	return this
+func (ag *aggregate) Hint(hint interface{}) Aggregate {
+	ag.opts.SetHint(hint)
+	return ag
 }
 
-func (this *aggregate) MaxTime(d time.Duration) Aggregate {
-	this.opts.SetMaxTime(d)
-	return this
+func (ag *aggregate) MaxTime(d time.Duration) Aggregate {
+	ag.opts.SetMaxTime(d)
+	return ag
 }
 
-func (this *aggregate) MaxAwaitTime(d time.Duration) Aggregate {
-	this.opts.SetMaxAwaitTime(d)
-	return this
+func (ag *aggregate) MaxAwaitTime(d time.Duration) Aggregate {
+	ag.opts.SetMaxAwaitTime(d)
+	return ag
 }
 
-func (this *aggregate) One(result interface{}) error {
-	var cur = this.Cursor()
-	defer cur.Close(this.ctx)
-	if cur.Next(this.ctx) {
+func (ag *aggregate) One(result interface{}) error {
+	var cur = ag.Cursor()
+	defer cur.Close(ag.ctx)
+	if cur.Next(ag.ctx) {
 		return cur.One(result)
 	}
 	return cur.Error()
 }
 
-func (this *aggregate) All(result interface{}) error {
-	var cur = this.Cursor()
-	defer cur.Close(this.ctx)
-	return cur.All(this.ctx, result)
+func (ag *aggregate) All(result interface{}) error {
+	var cur = ag.Cursor()
+	defer cur.Close(ag.ctx)
+	return cur.All(ag.ctx, result)
 }
 
-func (this *aggregate) Cursor() Cursor {
-	var cur, err = this.aggregator.Aggregate(this.ctx, this.pipeline, this.opts)
+func (ag *aggregate) Cursor() Cursor {
+	var cur, err = ag.aggregator.Aggregate(ag.ctx, ag.pipeline, ag.opts)
 	return &cursor{Cursor: cur, err: err}
 }

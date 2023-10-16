@@ -108,176 +108,176 @@ type collection struct {
 	database   Database
 }
 
-func (this *collection) Database() Database {
-	return this.database
+func (c *collection) Database() Database {
+	return c.database
 }
 
-func (this *collection) Collection() *mongo.Collection {
-	return this.collection
+func (c *collection) Collection() *mongo.Collection {
+	return c.collection
 }
 
-func (this *collection) Name() string {
-	return this.collection.Name()
+func (c *collection) Name() string {
+	return c.collection.Name()
 }
 
-func (this *collection) Drop(ctx context.Context) error {
-	return this.collection.Drop(ctx)
+func (c *collection) Drop(ctx context.Context) error {
+	return c.collection.Drop(ctx)
 }
 
-func (this *collection) Clone(opts ...*CollectionOptions) (Collection, error) {
-	var nCollection, err = this.collection.Clone(opts...)
+func (c *collection) Clone(opts ...*CollectionOptions) (Collection, error) {
+	var nCollection, err = c.collection.Clone(opts...)
 	if err != nil {
 		return nil, err
 	}
-	return &collection{collection: nCollection, database: this.database}, nil
+	return &collection{collection: nCollection, database: c.database}, nil
 }
 
-func (this *collection) IndexView() IndexView {
-	var view = this.collection.Indexes()
+func (c *collection) IndexView() IndexView {
+	var view = c.collection.Indexes()
 	return &indexView{view: view}
 }
 
-func (this *collection) InsertOne(ctx context.Context, document interface{}, opts ...*InsertOneOptions) (*InsertOneResult, error) {
-	return this.collection.InsertOne(ctx, document, opts...)
+func (c *collection) InsertOne(ctx context.Context, document interface{}, opts ...*InsertOneOptions) (*InsertOneResult, error) {
+	return c.collection.InsertOne(ctx, document, opts...)
 }
 
-func (this *collection) InsertOneNx(ctx context.Context, filter interface{}, document interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
+func (c *collection) InsertOneNx(ctx context.Context, filter interface{}, document interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
 	var opt = options.MergeUpdateOptions(opts...)
 	opt.SetUpsert(true)
 	// mongodb update 操作中，当 upsert 为 true 时，如果满足查询条件的记录存在，不会执行 $setOnInsert 中的操作
-	return this.collection.UpdateOne(ctx, filter, bson.D{{"$setOnInsert", document}}, opt)
+	return c.collection.UpdateOne(ctx, filter, bson.D{{"$setOnInsert", document}}, opt)
 }
 
-func (this *collection) InsertMany(ctx context.Context, documents []interface{}, opts ...*InsertManyOptions) (*InsertManyResult, error) {
-	return this.collection.InsertMany(ctx, documents, opts...)
+func (c *collection) InsertMany(ctx context.Context, documents []interface{}, opts ...*InsertManyOptions) (*InsertManyResult, error) {
+	return c.collection.InsertMany(ctx, documents, opts...)
 }
 
-func (this *collection) Insert(ctx context.Context, documents ...interface{}) (*InsertManyResult, error) {
+func (c *collection) Insert(ctx context.Context, documents ...interface{}) (*InsertManyResult, error) {
 	var opts = options.InsertMany()
-	return this.collection.InsertMany(ctx, documents, opts)
+	return c.collection.InsertMany(ctx, documents, opts)
 }
 
-func (this *collection) RepsertOne(ctx context.Context, filter interface{}, replacement interface{}, opts ...*ReplaceOptions) (*UpdateResult, error) {
+func (c *collection) RepsertOne(ctx context.Context, filter interface{}, replacement interface{}, opts ...*ReplaceOptions) (*UpdateResult, error) {
 	var opt = options.MergeReplaceOptions(opts...)
 	opt.SetUpsert(true)
-	return this.collection.ReplaceOne(ctx, filter, replacement, opt)
+	return c.collection.ReplaceOne(ctx, filter, replacement, opt)
 }
 
-func (this *collection) ReplaceOne(ctx context.Context, filter interface{}, replacement interface{}, opts ...*ReplaceOptions) (*UpdateResult, error) {
-	return this.collection.ReplaceOne(ctx, filter, replacement, opts...)
+func (c *collection) ReplaceOne(ctx context.Context, filter interface{}, replacement interface{}, opts ...*ReplaceOptions) (*UpdateResult, error) {
+	return c.collection.ReplaceOne(ctx, filter, replacement, opts...)
 }
 
-func (this *collection) UpsertOne(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
+func (c *collection) UpsertOne(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
 	var opt = options.MergeUpdateOptions(opts...)
 	opt.SetUpsert(true)
-	return this.collection.UpdateOne(ctx, filter, update, opt)
+	return c.collection.UpdateOne(ctx, filter, update, opt)
 }
 
-func (this *collection) UpsertId(ctx context.Context, id interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
+func (c *collection) UpsertId(ctx context.Context, id interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
 	var opt = options.MergeUpdateOptions(opts...)
 	opt.SetUpsert(true)
-	return this.collection.UpdateOne(ctx, bson.D{{"_id", id}}, update, opt)
+	return c.collection.UpdateOne(ctx, bson.D{{"_id", id}}, update, opt)
 }
 
-func (this *collection) Upsert(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
+func (c *collection) Upsert(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
 	var opt = options.MergeUpdateOptions(opts...)
 	opt.SetUpsert(true)
-	return this.collection.UpdateMany(ctx, filter, update, opt)
+	return c.collection.UpdateMany(ctx, filter, update, opt)
 }
 
-func (this *collection) UpdateOne(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
-	return this.collection.UpdateOne(ctx, filter, update, opts...)
+func (c *collection) UpdateOne(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
+	return c.collection.UpdateOne(ctx, filter, update, opts...)
 }
 
-func (this *collection) UpdateId(ctx context.Context, id interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
-	return this.collection.UpdateByID(ctx, id, update, opts...)
+func (c *collection) UpdateId(ctx context.Context, id interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
+	return c.collection.UpdateByID(ctx, id, update, opts...)
 }
 
-func (this *collection) UpdateMany(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
-	return this.collection.UpdateMany(ctx, filter, update, opts...)
+func (c *collection) UpdateMany(ctx context.Context, filter interface{}, update interface{}, opts ...*UpdateOptions) (*UpdateResult, error) {
+	return c.collection.UpdateMany(ctx, filter, update, opts...)
 }
 
-func (this *collection) DeleteOne(ctx context.Context, filter interface{}, opts ...*DeleteOptions) (*DeleteResult, error) {
-	return this.collection.DeleteOne(ctx, filter, opts...)
+func (c *collection) DeleteOne(ctx context.Context, filter interface{}, opts ...*DeleteOptions) (*DeleteResult, error) {
+	return c.collection.DeleteOne(ctx, filter, opts...)
 }
 
-func (this *collection) DeleteId(ctx context.Context, id interface{}, opts ...*DeleteOptions) (*DeleteResult, error) {
-	return this.collection.DeleteOne(ctx, bson.D{{"_id", id}}, opts...)
+func (c *collection) DeleteId(ctx context.Context, id interface{}, opts ...*DeleteOptions) (*DeleteResult, error) {
+	return c.collection.DeleteOne(ctx, bson.D{{"_id", id}}, opts...)
 }
 
-func (this *collection) DeleteMany(ctx context.Context, filter interface{}, opts ...*DeleteOptions) (*DeleteResult, error) {
-	return this.collection.DeleteMany(ctx, filter, opts...)
+func (c *collection) DeleteMany(ctx context.Context, filter interface{}, opts ...*DeleteOptions) (*DeleteResult, error) {
+	return c.collection.DeleteMany(ctx, filter, opts...)
 }
 
-func (this *collection) Find(ctx context.Context, filter interface{}) Query {
+func (c *collection) Find(ctx context.Context, filter interface{}) Query {
 	var q = &query{}
 	q.ctx = ctx
-	q.collection = this
+	q.collection = c
 	q.filter = filter
 	return q
 }
 
-func (this *collection) FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}) FindUpdate {
+func (c *collection) FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}) FindUpdate {
 	var q = &findUpdate{}
 	q.filter = filter
 	q.update = update
 	q.ctx = ctx
 	q.opts = options.FindOneAndUpdate()
-	q.collection = this
+	q.collection = c
 	return q
 }
 
-func (this *collection) FindOneAndReplace(ctx context.Context, filter interface{}, replacement interface{}) FindReplace {
+func (c *collection) FindOneAndReplace(ctx context.Context, filter interface{}, replacement interface{}) FindReplace {
 	var q = &findReplace{}
 	q.filter = filter
 	q.replacement = replacement
 	q.ctx = ctx
 	q.opts = options.FindOneAndReplace()
-	q.collection = this
+	q.collection = c
 	return q
 }
 
-func (this *collection) FindOneAndDelete(ctx context.Context, filter interface{}) FindDelete {
+func (c *collection) FindOneAndDelete(ctx context.Context, filter interface{}) FindDelete {
 	var q = &findDelete{}
 	q.filter = filter
 	q.ctx = ctx
 	q.opts = options.FindOneAndDelete()
-	q.collection = this
+	q.collection = c
 	return q
 }
 
-func (this *collection) Bulk(ctx context.Context) Bulk {
+func (c *collection) Bulk(ctx context.Context) Bulk {
 	var b = &bulk{}
 	b.ctx = ctx
 	b.opts = options.BulkWrite()
-	b.collection = this
+	b.collection = c
 	return b
 }
 
-func (this *collection) Distinct(ctx context.Context, fieldName string, filter interface{}) Distinct {
+func (c *collection) Distinct(ctx context.Context, fieldName string, filter interface{}) Distinct {
 	var d = &distinct{}
 	d.filter = filter
 	d.fieldName = fieldName
 	d.ctx = ctx
 	d.opts = options.Distinct()
-	d.collection = this
+	d.collection = c
 	return d
 }
 
-func (this *collection) Aggregate(ctx context.Context, pipeline interface{}) Aggregate {
+func (c *collection) Aggregate(ctx context.Context, pipeline interface{}) Aggregate {
 	var a = &aggregate{}
 	a.pipeline = pipeline
 	a.ctx = ctx
 	a.opts = options.Aggregate()
-	a.aggregator = this.collection
+	a.aggregator = c.collection
 	return a
 }
 
-func (this *collection) Watch(ctx context.Context, pipeline interface{}) Watcher {
+func (c *collection) Watch(ctx context.Context, pipeline interface{}) Watcher {
 	var w = &watch{}
 	w.pipeline = pipeline
 	w.ctx = ctx
 	w.opts = options.ChangeStream()
-	w.watcher = this.collection
+	w.watcher = c.collection
 	return w
 }

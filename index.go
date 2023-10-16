@@ -36,35 +36,35 @@ type indexView struct {
 	view mongo.IndexView
 }
 
-func (this *indexView) IndexView() mongo.IndexView {
-	return this.view
+func (iv *indexView) IndexView() mongo.IndexView {
+	return iv.view
 }
 
-func (this *indexView) Create(ctx context.Context, keys []string, opts *IndexOptions) (string, error) {
+func (iv *indexView) Create(ctx context.Context, keys []string, opts *IndexOptions) (string, error) {
 	var model = mongo.IndexModel{}
 	model.Keys = parseIndexKey(keys)
 	model.Options = opts
-	return this.view.CreateOne(ctx, model)
+	return iv.view.CreateOne(ctx, model)
 }
 
-func (this *indexView) CreateIndex(ctx context.Context, name string, keys []string) (string, error) {
+func (iv *indexView) CreateIndex(ctx context.Context, name string, keys []string) (string, error) {
 	var opts = NewIndexOptions()
 	opts.SetName(name)
-	return this.Create(ctx, keys, opts)
+	return iv.Create(ctx, keys, opts)
 }
 
-func (this *indexView) CreateUniqueIndex(ctx context.Context, name string, keys []string) (string, error) {
+func (iv *indexView) CreateUniqueIndex(ctx context.Context, name string, keys []string) (string, error) {
 	var opts = NewIndexOptions()
 	opts.SetName(name)
 	opts.SetUnique(true)
-	return this.Create(ctx, keys, opts)
+	return iv.Create(ctx, keys, opts)
 }
 
-func (this *indexView) CreateTTLIndex(ctx context.Context, name string, keys []string, ttl int32) (string, error) {
+func (iv *indexView) CreateTTLIndex(ctx context.Context, name string, keys []string, ttl int32) (string, error) {
 	var opts = NewIndexOptions()
 	opts.SetName(name)
 	opts.SetExpireAfterSeconds(ttl)
-	return this.Create(ctx, keys, opts)
+	return iv.Create(ctx, keys, opts)
 }
 
 func parseIndexKey(keys []string) bson.D {
@@ -77,7 +77,7 @@ func parseIndexKey(keys []string) bson.D {
 	return doc
 }
 
-func (this *indexView) DropIndex(ctx context.Context, keys []string) error {
+func (iv *indexView) DropIndex(ctx context.Context, keys []string) error {
 	var name string
 	for _, key := range keys {
 		field, sort := sortField(key)
@@ -89,16 +89,16 @@ func (this *indexView) DropIndex(ctx context.Context, keys []string) error {
 			name += "_" + field
 		}
 	}
-	_, err := this.view.DropOne(ctx, name)
+	_, err := iv.view.DropOne(ctx, name)
 	return err
 }
 
-func (this *indexView) Drop(ctx context.Context, name string) error {
-	_, err := this.view.DropOne(ctx, name)
+func (iv *indexView) Drop(ctx context.Context, name string) error {
+	_, err := iv.view.DropOne(ctx, name)
 	return err
 }
 
-func (this *indexView) DropAll(ctx context.Context) error {
-	_, err := this.view.DropAll(ctx)
+func (iv *indexView) DropAll(ctx context.Context) error {
+	_, err := iv.view.DropAll(ctx)
 	return err
 }

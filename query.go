@@ -107,102 +107,102 @@ type query struct {
 	collection Collection
 }
 
-func (this *query) AllowDiskUse(b bool) Query {
-	this.allowDiskUse = &b
-	return this
+func (q *query) AllowDiskUse(b bool) Query {
+	q.allowDiskUse = &b
+	return q
 }
 
-func (this *query) AllowPartialResults(b bool) Query {
-	this.allowPartialResults = &b
-	return this
+func (q *query) AllowPartialResults(b bool) Query {
+	q.allowPartialResults = &b
+	return q
 }
 
-func (this *query) BatchSize(n int32) Query {
-	this.batchSize = &n
-	return this
+func (q *query) BatchSize(n int32) Query {
+	q.batchSize = &n
+	return q
 }
 
-func (this *query) Collation(c *Collation) Query {
-	this.collation = c
-	return this
+func (q *query) Collation(c *Collation) Query {
+	q.collation = c
+	return q
 }
 
-func (this *query) Comment(s string) Query {
-	this.comment = &s
-	return this
+func (q *query) Comment(s string) Query {
+	q.comment = &s
+	return q
 }
 
-func (this *query) CursorType(cursorType CursorType) Query {
-	this.cursorType = &cursorType
-	return this
+func (q *query) CursorType(cursorType CursorType) Query {
+	q.cursorType = &cursorType
+	return q
 }
 
-func (this *query) Hint(hint interface{}) Query {
-	this.hint = hint
-	return this
+func (q *query) Hint(hint interface{}) Query {
+	q.hint = hint
+	return q
 }
 
-func (this *query) Limit(n int64) Query {
-	this.limit = &n
-	return this
+func (q *query) Limit(n int64) Query {
+	q.limit = &n
+	return q
 }
 
-func (this *query) Max(m interface{}) Query {
-	this.max = m
-	return this
+func (q *query) Max(m interface{}) Query {
+	q.max = m
+	return q
 }
 
-func (this *query) MaxAwaitTime(d time.Duration) Query {
-	this.maxAwaitTime = &d
-	return this
+func (q *query) MaxAwaitTime(d time.Duration) Query {
+	q.maxAwaitTime = &d
+	return q
 }
 
-func (this *query) MaxTime(d time.Duration) Query {
-	this.maxTime = &d
-	return this
+func (q *query) MaxTime(d time.Duration) Query {
+	q.maxTime = &d
+	return q
 }
 
-func (this *query) Min(m interface{}) Query {
-	this.min = m
-	return this
+func (q *query) Min(m interface{}) Query {
+	q.min = m
+	return q
 }
 
-func (this *query) NoCursorTimeout(b bool) Query {
-	this.noCursorTimeout = &b
-	return this
+func (q *query) NoCursorTimeout(b bool) Query {
+	q.noCursorTimeout = &b
+	return q
 }
 
-func (this *query) Project(projection interface{}) Query {
-	this.projection = projection
-	return this
+func (q *query) Project(projection interface{}) Query {
+	q.projection = projection
+	return q
 }
 
-func (this *query) Select(projection interface{}) Query {
-	this.projection = projection
-	return this
+func (q *query) Select(projection interface{}) Query {
+	q.projection = projection
+	return q
 }
 
-func (this *query) ReturnKey(b bool) Query {
-	this.returnKey = &b
-	return this
+func (q *query) ReturnKey(b bool) Query {
+	q.returnKey = &b
+	return q
 }
 
-func (this *query) ShowRecordId(b bool) Query {
-	this.showRecordId = &b
-	return this
+func (q *query) ShowRecordId(b bool) Query {
+	q.showRecordId = &b
+	return q
 }
 
-func (this *query) Skip(n int64) Query {
-	this.skip = &n
-	return this
+func (q *query) Skip(n int64) Query {
+	q.skip = &n
+	return q
 }
 
-func (this *query) Sort(fields ...string) Query {
+func (q *query) Sort(fields ...string) Query {
 	if len(fields) == 0 {
-		return this
+		return q
 	}
-	this.sort = sortFields(fields...)
-	return this
+	q.sort = sortFields(fields...)
+	return q
 }
 
 func sortFields(fields ...string) bson.D {
@@ -255,136 +255,136 @@ func sortField(field string) (key string, sort int32) {
 	return key, sort
 }
 
-func (this *query) One(result interface{}) error {
+func (q *query) One(result interface{}) error {
 	var opts = options.FindOne()
 
-	if this.allowPartialResults != nil {
-		opts.SetAllowPartialResults(*this.allowPartialResults)
+	if q.allowPartialResults != nil {
+		opts.SetAllowPartialResults(*q.allowPartialResults)
 	}
-	if this.collation != nil {
-		opts.SetCollation(this.collation)
+	if q.collation != nil {
+		opts.SetCollation(q.collation)
 	}
-	if this.comment != nil {
-		opts.SetComment(*this.comment)
+	if q.comment != nil {
+		opts.SetComment(*q.comment)
 	}
-	if this.hint != nil {
-		opts.SetHint(this.hint)
+	if q.hint != nil {
+		opts.SetHint(q.hint)
 	}
-	if this.max != nil {
-		opts.SetMax(this.max)
+	if q.max != nil {
+		opts.SetMax(q.max)
 	}
-	if this.maxTime != nil {
-		opts.SetMaxTime(*this.maxTime)
+	if q.maxTime != nil {
+		opts.SetMaxTime(*q.maxTime)
 	}
-	if this.min != nil {
-		opts.SetMin(this.min)
+	if q.min != nil {
+		opts.SetMin(q.min)
 	}
-	if this.projection != nil {
-		opts.SetProjection(this.projection)
+	if q.projection != nil {
+		opts.SetProjection(q.projection)
 	}
-	if this.returnKey != nil {
-		opts.SetReturnKey(*this.returnKey)
+	if q.returnKey != nil {
+		opts.SetReturnKey(*q.returnKey)
 	}
-	if this.showRecordId != nil {
-		opts.SetShowRecordID(*this.showRecordId)
+	if q.showRecordId != nil {
+		opts.SetShowRecordID(*q.showRecordId)
 	}
-	if this.skip != nil {
-		opts.SetSkip(*this.skip)
+	if q.skip != nil {
+		opts.SetSkip(*q.skip)
 	}
-	if this.sort != nil {
-		opts.SetSort(this.sort)
+	if q.sort != nil {
+		opts.SetSort(q.sort)
 	}
 
-	return this.collection.Collection().FindOne(this.ctx, this.filter, opts).Decode(result)
+	return q.collection.Collection().FindOne(q.ctx, q.filter, opts).Decode(result)
 }
 
-func (this *query) All(result interface{}) error {
-	var cur = this.Cursor()
-	defer cur.Close(this.ctx)
-	return cur.All(this.ctx, result)
+func (q *query) All(result interface{}) error {
+	var cur = q.Cursor()
+	defer cur.Close(q.ctx)
+	return cur.All(q.ctx, result)
 }
 
-func (this *query) Count() (n int64, err error) {
+func (q *query) Count() (n int64, err error) {
 	var opts = options.Count()
 
-	if this.collation != nil {
-		opts.SetCollation(this.collation)
+	if q.collation != nil {
+		opts.SetCollation(q.collation)
 	}
-	if this.hint != nil {
-		opts.SetHint(this.hint)
+	if q.hint != nil {
+		opts.SetHint(q.hint)
 	}
-	if this.limit != nil {
-		opts.SetLimit(*this.limit)
+	if q.limit != nil {
+		opts.SetLimit(*q.limit)
 	}
-	if this.maxTime != nil {
-		opts.SetMaxTime(*this.maxTime)
+	if q.maxTime != nil {
+		opts.SetMaxTime(*q.maxTime)
 	}
-	if this.skip != nil {
-		opts.SetSkip(*this.skip)
+	if q.skip != nil {
+		opts.SetSkip(*q.skip)
 	}
 
-	return this.collection.Collection().CountDocuments(this.ctx, this.filter, opts)
+	return q.collection.Collection().CountDocuments(q.ctx, q.filter, opts)
 }
 
-func (this *query) Cursor() Cursor {
+func (q *query) Cursor() Cursor {
 	var opts = options.Find()
 
-	if this.allowDiskUse != nil {
-		opts.SetAllowDiskUse(*this.allowDiskUse)
+	if q.allowDiskUse != nil {
+		opts.SetAllowDiskUse(*q.allowDiskUse)
 	}
-	if this.allowPartialResults != nil {
-		opts.SetAllowPartialResults(*this.allowPartialResults)
+	if q.allowPartialResults != nil {
+		opts.SetAllowPartialResults(*q.allowPartialResults)
 	}
-	if this.batchSize != nil {
-		opts.SetBatchSize(*this.batchSize)
+	if q.batchSize != nil {
+		opts.SetBatchSize(*q.batchSize)
 	}
-	if this.collation != nil {
-		opts.SetCollation(this.collation)
+	if q.collation != nil {
+		opts.SetCollation(q.collation)
 	}
-	if this.comment != nil {
-		opts.SetComment(*this.comment)
+	if q.comment != nil {
+		opts.SetComment(*q.comment)
 	}
-	if this.cursorType != nil {
-		opts.SetCursorType(*this.cursorType)
+	if q.cursorType != nil {
+		opts.SetCursorType(*q.cursorType)
 	}
-	if this.hint != nil {
-		opts.SetHint(this.hint)
+	if q.hint != nil {
+		opts.SetHint(q.hint)
 	}
-	if this.limit != nil {
-		opts.SetLimit(*this.limit)
+	if q.limit != nil {
+		opts.SetLimit(*q.limit)
 	}
-	if this.max != nil {
-		opts.SetMax(this.max)
+	if q.max != nil {
+		opts.SetMax(q.max)
 	}
-	if this.maxAwaitTime != nil {
-		opts.SetMaxAwaitTime(*this.maxAwaitTime)
+	if q.maxAwaitTime != nil {
+		opts.SetMaxAwaitTime(*q.maxAwaitTime)
 	}
-	if this.maxTime != nil {
-		opts.SetMaxTime(*this.maxTime)
+	if q.maxTime != nil {
+		opts.SetMaxTime(*q.maxTime)
 	}
-	if this.min != nil {
-		opts.SetMin(this.min)
+	if q.min != nil {
+		opts.SetMin(q.min)
 	}
-	if this.noCursorTimeout != nil {
-		opts.SetNoCursorTimeout(*this.noCursorTimeout)
+	if q.noCursorTimeout != nil {
+		opts.SetNoCursorTimeout(*q.noCursorTimeout)
 	}
-	if this.projection != nil {
-		opts.SetProjection(this.projection)
+	if q.projection != nil {
+		opts.SetProjection(q.projection)
 	}
-	if this.returnKey != nil {
-		opts.SetReturnKey(*this.returnKey)
+	if q.returnKey != nil {
+		opts.SetReturnKey(*q.returnKey)
 	}
-	if this.showRecordId != nil {
-		opts.SetShowRecordID(*this.showRecordId)
+	if q.showRecordId != nil {
+		opts.SetShowRecordID(*q.showRecordId)
 	}
-	if this.skip != nil {
-		opts.SetSkip(*this.skip)
+	if q.skip != nil {
+		opts.SetSkip(*q.skip)
 	}
-	if this.sort != nil {
-		opts.SetSort(this.sort)
+	if q.sort != nil {
+		opts.SetSort(q.sort)
 	}
 
-	var cur, err = this.collection.Collection().Find(this.ctx, this.filter, opts)
+	var cur, err = q.collection.Collection().Find(q.ctx, q.filter, opts)
 	return &cursor{Cursor: cur, err: err}
 }
 

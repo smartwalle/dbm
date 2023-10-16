@@ -24,17 +24,17 @@ type distinct struct {
 	collection Collection
 }
 
-func (this *distinct) Collation(c *Collation) Distinct {
-	this.opts.SetCollation(c)
-	return this
+func (d *distinct) Collation(c *Collation) Distinct {
+	d.opts.SetCollation(c)
+	return d
 }
 
-func (this *distinct) MaxTime(d time.Duration) Distinct {
-	this.opts.SetMaxTime(d)
-	return this
+func (d *distinct) MaxTime(duration time.Duration) Distinct {
+	d.opts.SetMaxTime(duration)
+	return d
 }
 
-func (this *distinct) Apply(result interface{}) error {
+func (d *distinct) Apply(result interface{}) error {
 	var resultValue = reflect.ValueOf(result)
 	if resultValue.Kind() != reflect.Ptr {
 		return ErrResultNotSlice
@@ -45,12 +45,12 @@ func (this *distinct) Apply(result interface{}) error {
 		return ErrResultNotSlice
 	}
 
-	var data, err = this.collection.Collection().Distinct(this.ctx, this.fieldName, this.filter, this.opts)
+	var data, err = d.collection.Collection().Distinct(d.ctx, d.fieldName, d.filter, d.opts)
 	if err != nil {
 		return err
 	}
 
-	valueType, valueBytes, err := bson.MarshalValueWithRegistry(this.collection.Database().Client().Registry(), data)
+	valueType, valueBytes, err := bson.MarshalValueWithRegistry(d.collection.Database().Client().Registry(), data)
 	if err != nil {
 		return err
 	}

@@ -54,28 +54,28 @@ type session struct {
 	mongo.SessionContext
 }
 
-func (this *session) Context() SessionContext {
-	return this.SessionContext
+func (s *session) Context() SessionContext {
+	return s.SessionContext
 }
 
-func (this *session) StartTransaction(opts ...*TransactionOptions) error {
-	return this.SessionContext.StartTransaction(opts...)
+func (s *session) StartTransaction(opts ...*TransactionOptions) error {
+	return s.SessionContext.StartTransaction(opts...)
 }
 
-func (this *session) AbortTransaction(ctx context.Context) error {
-	return this.SessionContext.AbortTransaction(ctx)
+func (s *session) AbortTransaction(ctx context.Context) error {
+	return s.SessionContext.AbortTransaction(ctx)
 }
 
-func (this *session) CommitTransaction(ctx context.Context) error {
-	return this.SessionContext.CommitTransaction(ctx)
+func (s *session) CommitTransaction(ctx context.Context) error {
+	return s.SessionContext.CommitTransaction(ctx)
 }
 
-func (this *session) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
-	return this.SessionContext.WithTransaction(ctx, func(sessionCtx mongo.SessionContext) (interface{}, error) {
+func (s *session) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
+	return s.SessionContext.WithTransaction(ctx, func(sessionCtx mongo.SessionContext) (interface{}, error) {
 		return fn(sessionCtx)
 	}, opts...)
 }
 
-func (this *session) EndSession(ctx context.Context) {
-	this.SessionContext.EndSession(ctx)
+func (s *session) EndSession(ctx context.Context) {
+	s.SessionContext.EndSession(ctx)
 }

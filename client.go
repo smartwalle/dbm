@@ -143,36 +143,36 @@ func serverStatus(ctx context.Context, client *mongo.Client) (bson.Raw, error) {
 	return status, nil
 }
 
-func (this *client) Client() *mongo.Client {
-	return this.client
+func (c *client) Client() *mongo.Client {
+	return c.client
 }
 
-func (this *client) Registry() *bsoncodec.Registry {
-	return this.config.Registry
+func (c *client) Registry() *bsoncodec.Registry {
+	return c.config.Registry
 }
 
-func (this *client) Close(ctx context.Context) error {
-	return this.client.Disconnect(ctx)
+func (c *client) Close(ctx context.Context) error {
+	return c.client.Disconnect(ctx)
 }
 
-func (this *client) Ping(ctx context.Context) error {
-	return this.client.Ping(ctx, readpref.Primary())
+func (c *client) Ping(ctx context.Context) error {
+	return c.client.Ping(ctx, readpref.Primary())
 }
 
-func (this *client) ServerStatus(ctx context.Context) (bson.Raw, error) {
-	return serverStatus(ctx, this.client)
+func (c *client) ServerStatus(ctx context.Context) (bson.Raw, error) {
+	return serverStatus(ctx, c.client)
 }
 
-func (this *client) ServerVersion() string {
-	return this.version
+func (c *client) ServerVersion() string {
+	return c.version
 }
 
-func (this *client) TransactionAllowed() bool {
-	return this.transactionAllowed
+func (c *client) TransactionAllowed() bool {
+	return c.transactionAllowed
 }
 
-func (this *client) Database(name string, opts ...*DatabaseOptions) Database {
-	return &database{database: this.client.Database(name, opts...), client: this}
+func (c *client) Database(name string, opts ...*DatabaseOptions) Database {
+	return &database{database: c.client.Database(name, opts...), client: c}
 }
 
 // WithTransaction
@@ -194,8 +194,8 @@ func (this *client) Database(name string, opts ...*DatabaseOptions) Database {
 //			}
 //			return nil, nil
 //	}
-func (this *client) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
-	var sess, err = this.StartSession(ctx)
+func (c *client) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
+	var sess, err = c.StartSession(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -227,23 +227,23 @@ func (this *client) WithTransaction(ctx context.Context, fn func(sCtx SessionCon
 //			}
 //			return sess.CommitTransaction(context.Background())
 //	})
-func (this *client) UseSession(ctx context.Context, fn func(sess Session) error) error {
-	if !this.transactionAllowed {
+func (c *client) UseSession(ctx context.Context, fn func(sess Session) error) error {
+	if !c.transactionAllowed {
 		return ErrSessionNotSupported
 	}
-	return this.client.UseSession(ctx, func(sCtx mongo.SessionContext) error {
+	return c.client.UseSession(ctx, func(sCtx mongo.SessionContext) error {
 		var s = &session{}
 		s.SessionContext = sCtx
 		return fn(s)
 	})
 }
 
-func (this *client) UseSessionWithOptions(ctx context.Context, opts *SessionOptions, fn func(sess Session) error) error {
-	if !this.transactionAllowed {
+func (c *client) UseSessionWithOptions(ctx context.Context, opts *SessionOptions, fn func(sess Session) error) error {
+	if !c.transactionAllowed {
 		return ErrSessionNotSupported
 	}
 
-	return this.client.UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {
+	return c.client.UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {
 		var s = &session{}
 		s.SessionContext = sCtx
 		return fn(s)
@@ -279,24 +279,24 @@ func (this *client) UseSessionWithOptions(ctx context.Context, opts *SessionOpti
 //	}
 //
 // sess.CommitTransaction(context.Background())
-func (this *client) StartSession(ctx context.Context, opts ...*SessionOptions) (Session, error) {
-	if !this.transactionAllowed {
+func (c *client) StartSession(ctx context.Context, opts ...*SessionOptions) (Session, error) {
+	if !c.transactionAllowed {
 		return nil, ErrSessionNotSupported
 	}
 
-	var sess, err = this.client.StartSession(opts...)
+	var sess, err = c.client.StartSession(opts...)
 	if err != nil {
 		return nil, err
 	}
 	return &session{SessionContext: mongo.NewSessionContext(ctx, sess)}, nil
 }
 
-func (this *client) Watch(ctx context.Context, pipeline interface{}) Watcher {
+func (c *client) Watch(ctx context.Context, pipeline interface{}) Watcher {
 	var w = &watch{}
 	w.pipeline = pipeline
 	w.ctx = ctx
 	w.opts = options.ChangeStream()
-	w.watcher = this.client
+	w.watcher = c.client
 	return w
 }
 

@@ -79,43 +79,43 @@ type watch struct {
 	watcher watcher
 }
 
-func (this *watch) BatchSize(n int32) Watcher {
-	this.opts.SetBatchSize(n)
-	return this
+func (w *watch) BatchSize(n int32) Watcher {
+	w.opts.SetBatchSize(n)
+	return w
 }
 
-func (this *watch) Collation(c Collation) Watcher {
-	this.opts.SetCollation(c)
-	return this
+func (w *watch) Collation(c Collation) Watcher {
+	w.opts.SetCollation(c)
+	return w
 }
 
-func (this *watch) FullDocument(fd FullDocument) Watcher {
-	this.opts.SetFullDocument(fd)
-	return this
+func (w *watch) FullDocument(fd FullDocument) Watcher {
+	w.opts.SetFullDocument(fd)
+	return w
 }
 
-func (this *watch) MaxAwaitTime(d time.Duration) Watcher {
-	this.opts.SetMaxAwaitTime(d)
-	return this
+func (w *watch) MaxAwaitTime(d time.Duration) Watcher {
+	w.opts.SetMaxAwaitTime(d)
+	return w
 }
 
-func (this *watch) ResumeAfter(rt interface{}) Watcher {
-	this.opts.SetResumeAfter(rt)
-	return this
+func (w *watch) ResumeAfter(rt interface{}) Watcher {
+	w.opts.SetResumeAfter(rt)
+	return w
 }
 
-func (this *watch) StartAtOperationTime(t *Timestamp) Watcher {
-	this.opts.SetStartAtOperationTime(t)
-	return this
+func (w *watch) StartAtOperationTime(t *Timestamp) Watcher {
+	w.opts.SetStartAtOperationTime(t)
+	return w
 }
 
-func (this *watch) StartAfter(sa interface{}) Watcher {
-	this.opts.SetStartAfter(sa)
-	return this
+func (w *watch) StartAfter(sa interface{}) Watcher {
+	w.opts.SetStartAfter(sa)
+	return w
 }
 
-func (this *watch) Stream() Stream {
-	var s, err = this.watcher.Watch(this.ctx, this.pipeline, this.opts)
+func (w *watch) Stream() Stream {
+	var s, err = w.watcher.Watch(w.ctx, w.pipeline, w.opts)
 	var ns = &stream{}
 	ns.ChangeStream = s
 	ns.err = err
@@ -143,51 +143,51 @@ type stream struct {
 	err error
 }
 
-func (this *stream) ID() int64 {
-	if this.err != nil {
+func (s *stream) ID() int64 {
+	if s.err != nil {
 		return 0
 	}
-	return this.ChangeStream.ID()
+	return s.ChangeStream.ID()
 }
 
-func (this *stream) ResumeToken() Raw {
-	if this.err != nil {
+func (s *stream) ResumeToken() Raw {
+	if s.err != nil {
 		return nil
 	}
-	return this.ChangeStream.ResumeToken()
+	return s.ChangeStream.ResumeToken()
 }
 
-func (this *stream) Next(ctx context.Context) bool {
-	if this.err != nil {
+func (s *stream) Next(ctx context.Context) bool {
+	if s.err != nil {
 		return false
 	}
-	return this.ChangeStream.Next(ctx)
+	return s.ChangeStream.Next(ctx)
 }
 
-func (this *stream) TryNext(ctx context.Context) bool {
-	if this.err != nil {
+func (s *stream) TryNext(ctx context.Context) bool {
+	if s.err != nil {
 		return false
 	}
-	return this.ChangeStream.TryNext(ctx)
+	return s.ChangeStream.TryNext(ctx)
 }
 
-func (this *stream) One(result interface{}) error {
-	if this.err != nil {
-		return this.err
+func (s *stream) One(result interface{}) error {
+	if s.err != nil {
+		return s.err
 	}
-	return this.ChangeStream.Decode(result)
+	return s.ChangeStream.Decode(result)
 }
 
-func (this *stream) Close(ctx context.Context) error {
-	if this.err != nil {
-		return this.err
+func (s *stream) Close(ctx context.Context) error {
+	if s.err != nil {
+		return s.err
 	}
-	return this.ChangeStream.Close(ctx)
+	return s.ChangeStream.Close(ctx)
 }
 
-func (this *stream) Error() error {
-	if this.err != nil {
-		return this.err
+func (s *stream) Error() error {
+	if s.err != nil {
+		return s.err
 	}
-	return this.ChangeStream.Err()
+	return s.ChangeStream.Err()
 }
