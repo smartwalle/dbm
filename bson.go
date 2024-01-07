@@ -33,12 +33,16 @@ func IsValidObjectId(s string) bool {
 	return primitive.IsValidObjectID(s)
 }
 
+// E represents a BSON element for a D. It is usually used inside a D.
 type E = bson.E
 
+// D is an ordered representation of a BSON document.
 type D = bson.D
 
+// M is an unordered representation of a BSON document.
 type M = bson.M
 
+// An A is an ordered representation of a BSON array.
 type A = bson.A
 
 type Raw = bson.Raw

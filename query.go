@@ -419,56 +419,56 @@ type findUpdate struct {
 	collection Collection
 }
 
-func (this *findUpdate) ArrayFilters(filters ArrayFilters) FindUpdate {
-	this.opts.SetArrayFilters(filters)
-	return this
+func (fu *findUpdate) ArrayFilters(filters ArrayFilters) FindUpdate {
+	fu.opts.SetArrayFilters(filters)
+	return fu
 }
 
-func (this *findUpdate) BypassDocumentValidation(b bool) FindUpdate {
-	this.opts.SetBypassDocumentValidation(b)
-	return this
+func (fu *findUpdate) BypassDocumentValidation(b bool) FindUpdate {
+	fu.opts.SetBypassDocumentValidation(b)
+	return fu
 }
 
-func (this *findUpdate) Collation(c *Collation) FindUpdate {
-	this.opts.SetCollation(c)
-	return this
+func (fu *findUpdate) Collation(c *Collation) FindUpdate {
+	fu.opts.SetCollation(c)
+	return fu
 }
 
-func (this *findUpdate) MaxTime(d time.Duration) FindUpdate {
-	this.opts.SetMaxTime(d)
-	return this
+func (fu *findUpdate) MaxTime(d time.Duration) FindUpdate {
+	fu.opts.SetMaxTime(d)
+	return fu
 }
 
-func (this *findUpdate) Project(projection interface{}) FindUpdate {
-	this.opts.SetProjection(projection)
-	return this
+func (fu *findUpdate) Project(projection interface{}) FindUpdate {
+	fu.opts.SetProjection(projection)
+	return fu
 }
 
-func (this *findUpdate) ReturnDocument(rd ReturnDocument) FindUpdate {
-	this.opts.SetReturnDocument(rd)
-	return this
+func (fu *findUpdate) ReturnDocument(rd ReturnDocument) FindUpdate {
+	fu.opts.SetReturnDocument(rd)
+	return fu
 }
 
-func (this *findUpdate) Sort(fields ...string) FindUpdate {
+func (fu *findUpdate) Sort(fields ...string) FindUpdate {
 	if len(fields) == 0 {
-		return this
+		return fu
 	}
-	this.opts.SetSort(sortFields(fields...))
-	return this
+	fu.opts.SetSort(sortFields(fields...))
+	return fu
 }
 
-func (this *findUpdate) Upsert(b bool) FindUpdate {
-	this.opts.SetUpsert(b)
-	return this
+func (fu *findUpdate) Upsert(b bool) FindUpdate {
+	fu.opts.SetUpsert(b)
+	return fu
 }
 
-func (this *findUpdate) Hint(hint interface{}) FindUpdate {
-	this.opts.SetHint(hint)
-	return this
+func (fu *findUpdate) Hint(hint interface{}) FindUpdate {
+	fu.opts.SetHint(hint)
+	return fu
 }
 
-func (this *findUpdate) Apply(result interface{}) error {
-	var err = this.collection.Collection().FindOneAndUpdate(this.ctx, this.filter, this.update, this.opts).Decode(result)
+func (fu *findUpdate) Apply(result interface{}) error {
+	var err = fu.collection.Collection().FindOneAndUpdate(fu.ctx, fu.filter, fu.update, fu.opts).Decode(result)
 	return err
 }
 
@@ -501,51 +501,51 @@ type findReplace struct {
 	collection Collection
 }
 
-func (this *findReplace) BypassDocumentValidation(b bool) FindReplace {
-	this.opts.SetBypassDocumentValidation(b)
-	return this
+func (fr *findReplace) BypassDocumentValidation(b bool) FindReplace {
+	fr.opts.SetBypassDocumentValidation(b)
+	return fr
 }
 
-func (this *findReplace) Collation(c *Collation) FindReplace {
-	this.opts.SetCollation(c)
-	return this
+func (fr *findReplace) Collation(c *Collation) FindReplace {
+	fr.opts.SetCollation(c)
+	return fr
 }
 
-func (this *findReplace) MaxTime(d time.Duration) FindReplace {
-	this.opts.SetMaxTime(d)
-	return this
+func (fr *findReplace) MaxTime(d time.Duration) FindReplace {
+	fr.opts.SetMaxTime(d)
+	return fr
 }
 
-func (this *findReplace) Project(projection interface{}) FindReplace {
-	this.opts.SetProjection(projection)
-	return this
+func (fr *findReplace) Project(projection interface{}) FindReplace {
+	fr.opts.SetProjection(projection)
+	return fr
 }
 
-func (this *findReplace) ReturnDocument(rd ReturnDocument) FindReplace {
-	this.opts.SetReturnDocument(rd)
-	return this
+func (fr *findReplace) ReturnDocument(rd ReturnDocument) FindReplace {
+	fr.opts.SetReturnDocument(rd)
+	return fr
 }
 
-func (this *findReplace) Sort(fields ...string) FindReplace {
+func (fr *findReplace) Sort(fields ...string) FindReplace {
 	if len(fields) == 0 {
-		return this
+		return fr
 	}
-	this.opts.SetSort(sortFields(fields...))
-	return this
+	fr.opts.SetSort(sortFields(fields...))
+	return fr
 }
 
-func (this *findReplace) Upsert(b bool) FindReplace {
-	this.opts.SetUpsert(b)
-	return this
+func (fr *findReplace) Upsert(b bool) FindReplace {
+	fr.opts.SetUpsert(b)
+	return fr
 }
 
-func (this *findReplace) Hint(hint interface{}) FindReplace {
-	this.opts.SetHint(hint)
-	return this
+func (fr *findReplace) Hint(hint interface{}) FindReplace {
+	fr.opts.SetHint(hint)
+	return fr
 }
 
-func (this *findReplace) Apply(result interface{}) error {
-	var err = this.collection.Collection().FindOneAndReplace(this.ctx, this.filter, this.replacement, this.opts).Decode(result)
+func (fr *findReplace) Apply(result interface{}) error {
+	var err = fr.collection.Collection().FindOneAndReplace(fr.ctx, fr.filter, fr.replacement, fr.opts).Decode(result)
 	return err
 }
 
@@ -571,35 +571,35 @@ type findDelete struct {
 	collection Collection
 }
 
-func (this *findDelete) Collation(c *Collation) FindDelete {
-	this.opts.SetCollation(c)
-	return this
+func (fd *findDelete) Collation(c *Collation) FindDelete {
+	fd.opts.SetCollation(c)
+	return fd
 }
 
-func (this *findDelete) MaxTime(d time.Duration) FindDelete {
-	this.opts.SetMaxTime(d)
-	return this
+func (fd *findDelete) MaxTime(d time.Duration) FindDelete {
+	fd.opts.SetMaxTime(d)
+	return fd
 }
 
-func (this *findDelete) Project(projection interface{}) FindDelete {
-	this.opts.SetProjection(projection)
-	return this
+func (fd *findDelete) Project(projection interface{}) FindDelete {
+	fd.opts.SetProjection(projection)
+	return fd
 }
 
-func (this *findDelete) Sort(fields ...string) FindDelete {
+func (fd *findDelete) Sort(fields ...string) FindDelete {
 	if len(fields) == 0 {
-		return this
+		return fd
 	}
-	this.opts.SetSort(sortFields(fields...))
-	return this
+	fd.opts.SetSort(sortFields(fields...))
+	return fd
 }
 
-func (this *findDelete) Hint(hint interface{}) FindDelete {
-	this.opts.SetHint(hint)
-	return this
+func (fd *findDelete) Hint(hint interface{}) FindDelete {
+	fd.opts.SetHint(hint)
+	return fd
 }
 
-func (this *findDelete) Apply(result interface{}) error {
-	var err = this.collection.Collection().FindOneAndDelete(this.ctx, this.filter, this.opts).Decode(result)
+func (fd *findDelete) Apply(result interface{}) error {
+	var err = fd.collection.Collection().FindOneAndDelete(fd.ctx, fd.filter, fd.opts).Decode(result)
 	return err
 }
