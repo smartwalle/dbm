@@ -94,7 +94,7 @@ type Collection interface {
 
 	FindOneAndDelete(ctx context.Context, filter interface{}) FindDelete
 
-	Bulk(ctx context.Context) Bulk
+	Bulk() Bulk
 
 	Distinct(ctx context.Context, fieldName string, filter interface{}) Distinct
 
@@ -246,9 +246,8 @@ func (c *collection) FindOneAndDelete(ctx context.Context, filter interface{}) F
 	return q
 }
 
-func (c *collection) Bulk(ctx context.Context) Bulk {
+func (c *collection) Bulk() Bulk {
 	var b = &bulk{}
-	b.ctx = ctx
 	b.opts = options.BulkWrite()
 	b.collection = c
 	return b

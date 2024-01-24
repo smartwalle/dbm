@@ -77,12 +77,11 @@ type Bulk interface {
 
 	DeleteMany(filter interface{}) Bulk
 
-	Apply() (*BulkResult, error)
+	Apply(ctx context.Context) (*BulkResult, error)
 }
 
 type bulk struct {
 	models     []mongo.WriteModel
-	ctx        context.Context
 	opts       *options.BulkWriteOptions
 	collection Collection
 }
@@ -187,7 +186,7 @@ func (b *bulk) DeleteMany(filter interface{}) Bulk {
 	return b.AddModel(m)
 }
 
-func (b *bulk) Apply() (*BulkResult, error) {
-	var result, err = b.collection.Collection().BulkWrite(b.ctx, b.models, b.opts)
+func (b *bulk) Apply(ctx context.Context) (*BulkResult, error) {
+	var result, err = b.collection.Collection().BulkWrite(ctx, b.models, b.opts)
 	return result, err
 }
