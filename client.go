@@ -177,22 +177,18 @@ func (c *client) Database(name string, opts ...*DatabaseOptions) Database {
 
 // WithTransaction
 //
-// var client, _ = dbm.New(...)
-//
-// var db = client.Database("xx")
-//
-// var c1 = db.Collection("c1")
-//
-// var c2 = db.Collection("c2")
-//
+//	var client, _ = dbm.New(...)
+//	var db = client.Database("xx")
+//	var c1 = db.Collection("c1")
+//	var c2 = db.Collection("c2")
 //	db.WithTransaction(context.Background(), func(sCtx SessionContext) (interface{}, error) {
-//			if _, sErr := c1.Insert(sCtx, ...); sErr != nil {
-//				return nil, sErr
-//			}
-//			if _, sErr := c2.Insert(sCtx, ...); sErr != nil {
-//				return nil, sErr
-//			}
-//			return nil, nil
+//	  if _, sErr := c1.Insert(sCtx, ...); sErr != nil {
+//	    return nil, sErr
+//	  }
+//	  if _, sErr := c2.Insert(sCtx, ...); sErr != nil {
+//	    return nil, sErr
+//	  }
+//	  return nil, nil
 //	}
 func (c *client) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
 	var sess, err = c.StartSession(ctx)
@@ -205,27 +201,23 @@ func (c *client) WithTransaction(ctx context.Context, fn func(sCtx SessionContex
 
 // UseSession
 //
-// var client, _ = dbm.New(...)
-//
-// var db = client.Database("xx")
-//
-// var c1 = db.Collection("c1")
-//
-// var c2 = db.Collection("c2")
-//
+//	var client, _ = dbm.New(...)
+//	var db = client.Database("xx")
+//	var c1 = db.Collection("c1")
+//	var c2 = db.Collection("c2")
 //	db.UseSession(context.Background(), func(sess dbm.Session) error {
-//			if sErr := sess.StartTransaction(); sErr != nil {
-//				return sErr
-//			}
-//			if _, sErr := c1.Insert(sess, ...); sErr != nil {
-//				sess.AbortTransaction(context.Background())
-//				return nil, sErr
-//			}
-//			if _, sErr := c2.Insert(sess, ...); sErr != nil {
-//				sess.AbortTransaction(context.Background())
-//				return nil, sErr
-//			}
-//			return sess.CommitTransaction(context.Background())
+//	  if sErr := sess.StartTransaction(); sErr != nil {
+//	    return sErr
+//	  }
+//	  if _, sErr := c1.Insert(sess, ...); sErr != nil {
+//	    sess.AbortTransaction(context.Background())
+//	    return nil, sErr
+//	  }
+//	  if _, sErr := c2.Insert(sess, ...); sErr != nil {
+//	    sess.AbortTransaction(context.Background())
+//	    return nil, sErr
+//	  }
+//	  return sess.CommitTransaction(context.Background())
 //	})
 func (c *client) UseSession(ctx context.Context, fn func(sess Session) error) error {
 	if !c.transactionAllowed {
@@ -252,33 +244,24 @@ func (c *client) UseSessionWithOptions(ctx context.Context, opts *SessionOptions
 
 // StartSession
 //
-// var client, _ = dbm.New(...)
-//
-// var db = client.Database("xx")
-//
-// var c1 = db.Collection("c1")
-//
-// var c2 = db.Collection("c2")
-//
-// var sess, _ = db.StartSession(context.Background())
-//
-// defer sess.EndSession(context.Background())
-//
+//	var client, _ = dbm.New(...)
+//	var db = client.Database("xx")
+//	var c1 = db.Collection("c1")
+//	var c2 = db.Collection("c2")
+//	var sess, _ = db.StartSession(context.Background())
+//	defer sess.EndSession(context.Background())
 //	if sErr := sess.StartTransaction(); sErr != nil {
-//			return
+//	  return
 //	}
-//
 //	if _, sErr := c1.Insert(sess, ...); sErr != nil {
-//			sess.AbortTransaction(context.Background())
-//			return sErr
+//	  sess.AbortTransaction(context.Background())
+//	  return sErr
 //	}
-//
 //	if _, sErr := c2.Insert(sess, ...); sErr != nil {
-//			sess.AbortTransaction(context.Background())
-//			return sErr
+//	  sess.AbortTransaction(context.Background())
+//	  return sErr
 //	}
-//
-// sess.CommitTransaction(context.Background())
+//	sess.CommitTransaction(context.Background())
 func (c *client) StartSession(ctx context.Context, opts ...*SessionOptions) (Session, error) {
 	if !c.transactionAllowed {
 		return nil, ErrSessionNotSupported
