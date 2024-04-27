@@ -7,23 +7,29 @@ import (
 )
 
 type User struct {
-	Id  string `bson:"_id"`
-	Age int    `bson:"age"`
+	Id   string `bson:"_id"`
+	Age  int    `bson:"age"`
+	Name string `bson:"name"`
 }
 
-func TestClient_BeginCommit(t *testing.T) {
-	var cfg = dbm.NewConfig("mongodb://mongo:mongo@127.0.0.1")
+var cfg = dbm.NewConfig("mongodb://mongo:mongo@127.0.0.1")
 
+func getDatabase(t *testing.T) dbm.Database {
 	var client, err = dbm.New(context.Background(), cfg)
 	if err != nil {
 		t.Fatal("连接数据库发生错误", err)
 	}
-	defer client.Close(context.Background())
 
 	var db = client.Database("test")
+	return db
+}
+
+func TestDatabase_BeginCommit(t *testing.T) {
+	var db = getDatabase(t)
+	defer db.Client().Close(context.Background())
 	var tUser = db.Collection("user")
 
-	tx, err := client.Begin(context.Background())
+	tx, err := db.Begin(context.Background())
 	if err != nil {
 		t.Fatal("开启事务发生错误", err)
 	}
@@ -31,12 +37,12 @@ func TestClient_BeginCommit(t *testing.T) {
 	var uid1 = dbm.NewObjectId().Hex()
 	var uid2 = dbm.NewObjectId().Hex()
 
-	if _, err = tUser.InsertOne(tx, &User{Id: uid1, Age: 10}); err != nil {
+	if _, err = tUser.InsertOne(tx, &User{Id: uid1, Age: 10, Name: "BeginCommit1-Good"}); err != nil {
 		tx.Rollback(context.Background())
 		t.Fatal("插入数据发生错误", err)
 	}
 
-	if _, err = tUser.InsertOne(tx, &User{Id: uid2, Age: 11}); err != nil {
+	if _, err = tUser.InsertOne(tx, &User{Id: uid2, Age: 11, Name: "BeginCommit2-Good"}); err != nil {
 		tx.Rollback(context.Background())
 		t.Fatal("插入数据发生错误", err)
 	}
@@ -63,19 +69,12 @@ func TestClient_BeginCommit(t *testing.T) {
 	}
 }
 
-func TestClient_BeginRollback(t *testing.T) {
-	var cfg = dbm.NewConfig("mongodb://mongo:mongo@127.0.0.1")
-
-	var client, err = dbm.New(context.Background(), cfg)
-	if err != nil {
-		t.Fatal("连接数据库发生错误", err)
-	}
-	defer client.Close(context.Background())
-
-	var db = client.Database("test")
+func TestDatabase_BeginRollback(t *testing.T) {
+	var db = getDatabase(t)
+	defer db.Client().Close(context.Background())
 	var tUser = db.Collection("user")
 
-	tx, err := client.Begin(context.Background())
+	tx, err := db.Begin(context.Background())
 	if err != nil {
 		t.Fatal("开启事务发生错误", err)
 	}
@@ -83,12 +82,12 @@ func TestClient_BeginRollback(t *testing.T) {
 	var uid1 = dbm.NewObjectId().Hex()
 	var uid2 = dbm.NewObjectId().Hex()
 
-	if _, err = tUser.InsertOne(tx, &User{Id: uid1, Age: 10}); err != nil {
+	if _, err = tUser.InsertOne(tx, &User{Id: uid1, Age: 10, Name: "BeginRollback1-Bad"}); err != nil {
 		tx.Rollback(context.Background())
 		t.Fatal("插入数据发生错误", err)
 	}
 
-	if _, err = tUser.InsertOne(tx, &User{Id: uid2, Age: 11}); err != nil {
+	if _, err = tUser.InsertOne(tx, &User{Id: uid2, Age: 11, Name: "BeginRollback2-Bad"}); err != nil {
 		tx.Rollback(context.Background())
 		t.Fatal("插入数据发生错误", err)
 	}
@@ -107,19 +106,12 @@ func TestClient_BeginRollback(t *testing.T) {
 	}
 }
 
-func TestClient_SessionCommit(t *testing.T) {
-	var cfg = dbm.NewConfig("mongodb://mongo:mongo@127.0.0.1")
-
-	var client, err = dbm.New(context.Background(), cfg)
-	if err != nil {
-		t.Fatal("连接数据库发生错误", err)
-	}
-	defer client.Close(context.Background())
-
-	var db = client.Database("test")
+func TestDatabase_SessionCommit(t *testing.T) {
+	var db = getDatabase(t)
+	defer db.Client().Close(context.Background())
 	var tUser = db.Collection("user")
 
-	sess, err := client.StartSession()
+	sess, err := db.StartSession()
 	if err != nil {
 		t.Fatal("StartSession 发生错误", err)
 	}
@@ -133,12 +125,12 @@ func TestClient_SessionCommit(t *testing.T) {
 	var uid1 = dbm.NewObjectId().Hex()
 	var uid2 = dbm.NewObjectId().Hex()
 
-	if _, err = tUser.InsertOne(tx, &User{Id: uid1, Age: 10}); err != nil {
+	if _, err = tUser.InsertOne(tx, &User{Id: uid1, Age: 10, Name: "SessionCommit1-Good"}); err != nil {
 		tx.Rollback(context.Background())
 		t.Fatal("插入数据发生错误", err)
 	}
 
-	if _, err = tUser.InsertOne(tx, &User{Id: uid2, Age: 11}); err != nil {
+	if _, err = tUser.InsertOne(tx, &User{Id: uid2, Age: 11, Name: "SessionCommit2-Good"}); err != nil {
 		tx.Rollback(context.Background())
 		t.Fatal("插入数据发生错误", err)
 	}
@@ -165,19 +157,12 @@ func TestClient_SessionCommit(t *testing.T) {
 	}
 }
 
-func TestClient_SessionRollback(t *testing.T) {
-	var cfg = dbm.NewConfig("mongodb://mongo:mongo@127.0.0.1")
-
-	var client, err = dbm.New(context.Background(), cfg)
-	if err != nil {
-		t.Fatal("连接数据库发生错误", err)
-	}
-	defer client.Close(context.Background())
-
-	var db = client.Database("test")
+func TestDatabase_SessionRollback(t *testing.T) {
+	var db = getDatabase(t)
+	defer db.Client().Close(context.Background())
 	var tUser = db.Collection("user")
 
-	sess, err := client.StartSession()
+	sess, err := db.StartSession()
 	if err != nil {
 		t.Fatal("StartSession 发生错误", err)
 	}
@@ -191,12 +176,12 @@ func TestClient_SessionRollback(t *testing.T) {
 	var uid1 = dbm.NewObjectId().Hex()
 	var uid2 = dbm.NewObjectId().Hex()
 
-	if _, err = tUser.InsertOne(tx, &User{Id: uid1, Age: 10}); err != nil {
+	if _, err = tUser.InsertOne(tx, &User{Id: uid1, Age: 10, Name: "SessionRollback1-Bad"}); err != nil {
 		tx.Rollback(context.Background())
 		t.Fatal("插入数据发生错误", err)
 	}
 
-	if _, err = tUser.InsertOne(tx, &User{Id: uid2, Age: 11}); err != nil {
+	if _, err = tUser.InsertOne(tx, &User{Id: uid2, Age: 11, Name: "SessionRollback2-Bad"}); err != nil {
 		tx.Rollback(context.Background())
 		t.Fatal("插入数据发生错误", err)
 	}
@@ -215,19 +200,12 @@ func TestClient_SessionRollback(t *testing.T) {
 	}
 }
 
-func TestClient_EndSession(t *testing.T) {
-	var cfg = dbm.NewConfig("mongodb://mongo:mongo@127.0.0.1")
-
-	var client, err = dbm.New(context.Background(), cfg)
-	if err != nil {
-		t.Fatal("连接数据库发生错误", err)
-	}
-	defer client.Close(context.Background())
-
-	var db = client.Database("test")
+func TestDatabase_EndSession(t *testing.T) {
+	var db = getDatabase(t)
+	defer db.Client().Close(context.Background())
 	var tUser = db.Collection("user")
 
-	sess, err := client.StartSession()
+	sess, err := db.StartSession()
 	if err != nil {
 		t.Fatal("StartSession 发生错误", err)
 	}
@@ -240,12 +218,12 @@ func TestClient_EndSession(t *testing.T) {
 	var uid1 = dbm.NewObjectId().Hex()
 	var uid2 = dbm.NewObjectId().Hex()
 
-	if _, err = tUser.InsertOne(tx, &User{Id: uid1, Age: 10}); err != nil {
+	if _, err = tUser.InsertOne(tx, &User{Id: uid1, Age: 10, Name: "EndSession1-Good"}); err != nil {
 		tx.Rollback(context.Background())
 		t.Fatal("插入数据发生错误", err)
 	}
 
-	if _, err = tUser.InsertOne(tx, &User{Id: uid2, Age: 11}); err != nil {
+	if _, err = tUser.InsertOne(tx, &User{Id: uid2, Age: 11, Name: "EndSession2-Good"}); err != nil {
 		tx.Rollback(context.Background())
 		t.Fatal("插入数据发生错误", err)
 	}
@@ -278,7 +256,7 @@ func TestClient_EndSession(t *testing.T) {
 		t.Fatal("开启事务发生错误", err)
 	}
 
-	if _, err = tUser.InsertOne(tx2, &User{Id: dbm.NewObjectId().String(), Age: 10}); err == nil {
+	if _, err = tUser.InsertOne(tx2, &User{Id: dbm.NewObjectId().String(), Age: 10, Name: "EndSession3-Bad"}); err == nil {
 		t.Fatal("Session 已经关闭，这里应该报错")
 	}
 }
