@@ -18,64 +18,21 @@ func NewTransactionOptions() *TransactionOptions {
 	return options.Transaction()
 }
 
-type SessionContext interface {
-	context.Context
-
-	AbortTransaction(context.Context) error
-
-	CommitTransaction(context.Context) error
-}
+type SessionContext = mongo.SessionContext
 
 type Session interface {
-	SessionContext
+	mongo.Session
 
-	Context() SessionContext
-
-	StartTransaction(...*TransactionOptions) error
-
-	WithTransaction(context.Context, func(sCtx SessionContext) (interface{}, error), ...*TransactionOptions) (interface{}, error)
-
-	EndSession(context.Context)
-
-	//ClusterTime() bson.Raw
-	//
-	//OperationTime() *primitive.Timestamp
-	//
-	//Client() *Client
-	//
-	//ID() bson.Raw
-	//
-	//AdvanceClusterTime(bson.Raw) error
-	//
-	//AdvanceOperationTime(*primitive.Timestamp) error
+	Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, error)
 }
 
 type session struct {
-	mongo.SessionContext
+	mongo.Session
 }
 
-func (s *session) Context() SessionContext {
-	return s.SessionContext
-}
-
-func (s *session) StartTransaction(opts ...*TransactionOptions) error {
-	return s.SessionContext.StartTransaction(opts...)
-}
-
-func (s *session) AbortTransaction(ctx context.Context) error {
-	return s.SessionContext.AbortTransaction(ctx)
-}
-
-func (s *session) CommitTransaction(ctx context.Context) error {
-	return s.SessionContext.CommitTransaction(ctx)
-}
-
-func (s *session) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
-	return s.SessionContext.WithTransaction(ctx, func(sessionCtx mongo.SessionContext) (interface{}, error) {
-		return fn(sessionCtx)
-	}, opts...)
-}
-
-func (s *session) EndSession(ctx context.Context) {
-	s.SessionContext.EndSession(ctx)
+func (s *session) Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, error) {
+	if err := s.Session.StartTransaction(opts...); err != nil {
+		return nil, err
+	}
+	return &transaction{mongo.NewSessionContext(ctx, s.Session), false}, nil
 }

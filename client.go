@@ -32,13 +32,13 @@ type Client interface {
 
 	Database(name string, opts ...*DatabaseOptions) Database
 
-	WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error)
+	UseSession(ctx context.Context, fn func(SessionContext) error) error
 
-	UseSession(ctx context.Context, fn func(sess Session) error) error
+	UseSessionWithOptions(ctx context.Context, opts *options.SessionOptions, fn func(SessionContext) error) error
 
-	UseSessionWithOptions(ctx context.Context, opts *SessionOptions, fn func(sess Session) error) error
+	StartSession(opts ...*SessionOptions) (Session, error)
 
-	StartSession(ctx context.Context, opts ...*SessionOptions) (Session, error)
+	Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, error)
 
 	Watch(ctx context.Context, pipeline interface{}) Watcher
 }
@@ -175,103 +175,46 @@ func (c *client) Database(name string, opts ...*DatabaseOptions) Database {
 	return &database{database: c.client.Database(name, opts...), client: c}
 }
 
-// WithTransaction
-//
-//	var client, _ = dbm.New(...)
-//	var db = client.Database("xx")
-//	var c1 = db.Collection("c1")
-//	var c2 = db.Collection("c2")
-//	db.WithTransaction(context.Background(), func(sCtx SessionContext) (interface{}, error) {
-//	  if _, sErr := c1.Insert(sCtx, ...); sErr != nil {
-//	    return nil, sErr
-//	  }
-//	  if _, sErr := c2.Insert(sCtx, ...); sErr != nil {
-//	    return nil, sErr
-//	  }
-//	  return nil, nil
-//	}
-func (c *client) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
-	var sess, err = c.StartSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer sess.EndSession(ctx)
-	return sess.WithTransaction(ctx, fn, opts...)
-}
-
-// UseSession
-//
-//	var client, _ = dbm.New(...)
-//	var db = client.Database("xx")
-//	var c1 = db.Collection("c1")
-//	var c2 = db.Collection("c2")
-//	db.UseSession(context.Background(), func(sess dbm.Session) error {
-//	  if sErr := sess.StartTransaction(); sErr != nil {
-//	    return sErr
-//	  }
-//	  if _, sErr := c1.Insert(sess, ...); sErr != nil {
-//	    sess.AbortTransaction(context.Background())
-//	    return nil, sErr
-//	  }
-//	  if _, sErr := c2.Insert(sess, ...); sErr != nil {
-//	    sess.AbortTransaction(context.Background())
-//	    return nil, sErr
-//	  }
-//	  return sess.CommitTransaction(context.Background())
-//	})
-func (c *client) UseSession(ctx context.Context, fn func(sess Session) error) error {
+func (c *client) UseSession(ctx context.Context, fn func(SessionContext) error) error {
 	if !c.transactionAllowed {
 		return ErrSessionNotSupported
 	}
-	return c.client.UseSession(ctx, func(sCtx mongo.SessionContext) error {
-		var s = &session{}
-		s.SessionContext = sCtx
-		return fn(s)
-	})
+	return c.client.UseSession(ctx, fn)
 }
 
-func (c *client) UseSessionWithOptions(ctx context.Context, opts *SessionOptions, fn func(sess Session) error) error {
+func (c *client) UseSessionWithOptions(ctx context.Context, opts *options.SessionOptions, fn func(SessionContext) error) error {
 	if !c.transactionAllowed {
 		return ErrSessionNotSupported
 	}
-
-	return c.client.UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {
-		var s = &session{}
-		s.SessionContext = sCtx
-		return fn(s)
-	})
+	return c.client.UseSessionWithOptions(ctx, opts, fn)
 }
 
-// StartSession
-//
-//	var client, _ = dbm.New(...)
-//	var db = client.Database("xx")
-//	var c1 = db.Collection("c1")
-//	var c2 = db.Collection("c2")
-//	var sess, _ = db.StartSession(context.Background())
-//	defer sess.EndSession(context.Background())
-//	if sErr := sess.StartTransaction(); sErr != nil {
-//	  return
-//	}
-//	if _, sErr := c1.Insert(sess, ...); sErr != nil {
-//	  sess.AbortTransaction(context.Background())
-//	  return sErr
-//	}
-//	if _, sErr := c2.Insert(sess, ...); sErr != nil {
-//	  sess.AbortTransaction(context.Background())
-//	  return sErr
-//	}
-//	sess.CommitTransaction(context.Background())
-func (c *client) StartSession(ctx context.Context, opts ...*SessionOptions) (Session, error) {
+func (c *client) startSession(opts ...*SessionOptions) (mongo.Session, error) {
 	if !c.transactionAllowed {
 		return nil, ErrSessionNotSupported
 	}
+	return c.client.StartSession(opts...)
+}
 
-	var sess, err = c.client.StartSession(opts...)
+func (c *client) StartSession(opts ...*SessionOptions) (Session, error) {
+	var sess, err = c.startSession(opts...)
 	if err != nil {
 		return nil, err
 	}
-	return &session{SessionContext: mongo.NewSessionContext(ctx, sess)}, nil
+	return &session{sess}, nil
+}
+
+func (c *client) Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, error) {
+	var sess, err = c.startSession()
+	if err != nil {
+		return nil, err
+	}
+
+	if err = sess.StartTransaction(opts...); err != nil {
+		sess.EndSession(ctx)
+		return nil, err
+	}
+	return &transaction{mongo.NewSessionContext(ctx, sess), true}, nil
 }
 
 func (c *client) Watch(ctx context.Context, pipeline interface{}) Watcher {

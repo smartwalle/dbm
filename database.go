@@ -23,13 +23,13 @@ type Database interface {
 
 	Collection(name string, opts ...*CollectionOptions) Collection
 
-	WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error)
+	UseSession(ctx context.Context, fn func(SessionContext) error) error
 
-	UseSession(ctx context.Context, fn func(sess Session) error) error
+	UseSessionWithOptions(ctx context.Context, opts *options.SessionOptions, fn func(SessionContext) error) error
 
-	UseSessionWithOptions(ctx context.Context, opts *SessionOptions, fn func(sess Session) error) error
+	StartSession(opts ...*SessionOptions) (Session, error)
 
-	StartSession(ctx context.Context, opts ...*SessionOptions) (Session, error)
+	Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, error)
 
 	Watch(ctx context.Context, pipeline interface{}) Watcher
 }
@@ -59,22 +59,6 @@ func (db *database) Collection(name string, opts ...*CollectionOptions) Collecti
 	return &collection{collection: db.database.Collection(name, opts...), database: db}
 }
 
-func (db *database) WithTransaction(ctx context.Context, fn func(sCtx SessionContext) (interface{}, error), opts ...*TransactionOptions) (interface{}, error) {
-	return db.client.WithTransaction(ctx, fn, opts...)
-}
-
-func (db *database) UseSession(ctx context.Context, fn func(sess Session) error) error {
-	return db.client.UseSession(ctx, fn)
-}
-
-func (db *database) UseSessionWithOptions(ctx context.Context, opts *SessionOptions, fn func(sess Session) error) error {
-	return db.client.UseSessionWithOptions(ctx, opts, fn)
-}
-
-func (db *database) StartSession(ctx context.Context, opts ...*SessionOptions) (Session, error) {
-	return db.client.StartSession(ctx, opts...)
-}
-
 func (db *database) Aggregate(ctx context.Context, pipeline interface{}) Aggregate {
 	var a = &aggregate{}
 	a.pipeline = pipeline
@@ -82,6 +66,22 @@ func (db *database) Aggregate(ctx context.Context, pipeline interface{}) Aggrega
 	a.opts = options.Aggregate()
 	a.aggregator = db.database
 	return a
+}
+
+func (db *database) UseSession(ctx context.Context, fn func(SessionContext) error) error {
+	return db.client.UseSession(ctx, fn)
+}
+
+func (db *database) UseSessionWithOptions(ctx context.Context, opts *options.SessionOptions, fn func(SessionContext) error) error {
+	return db.client.UseSessionWithOptions(ctx, opts, fn)
+}
+
+func (db *database) StartSession(opts ...*SessionOptions) (Session, error) {
+	return db.client.StartSession(opts...)
+}
+
+func (db *database) Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, error) {
+	return db.client.Begin(ctx, opts...)
 }
 
 func (db *database) Watch(ctx context.Context, pipeline interface{}) Watcher {
