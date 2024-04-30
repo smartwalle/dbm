@@ -22,8 +22,11 @@ const (
 )
 
 const (
-	Default      = options.Default
-	UpdateLookup = options.UpdateLookup
+	Default       = options.Default
+	Off           = options.Off
+	Required      = options.Required
+	UpdateLookup  = options.UpdateLookup
+	WhenAvailable = options.WhenAvailable
 )
 
 type CursorType = options.CursorType

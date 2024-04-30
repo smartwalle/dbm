@@ -1,6 +1,15 @@
 package dbm
 
-import "go.mongodb.org/mongo-driver/mongo"
+import (
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+type ChangeStreamOptions = options.ChangeStreamOptions
+
+func NewChangeStreamOptions() *ChangeStreamOptions {
+	return options.ChangeStream()
+}
 
 type ChangeStream = mongo.ChangeStream
 
