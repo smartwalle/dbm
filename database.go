@@ -31,7 +31,7 @@ type Database interface {
 
 	Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, error)
 
-	Watch(ctx context.Context, pipeline interface{}) Watcher
+	Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*ChangeStream, error)
 }
 
 type database struct {
@@ -84,11 +84,6 @@ func (db *database) Begin(ctx context.Context, opts ...*TransactionOptions) (Tx,
 	return db.client.Begin(ctx, opts...)
 }
 
-func (db *database) Watch(ctx context.Context, pipeline interface{}) Watcher {
-	var w = &watch{}
-	w.pipeline = pipeline
-	w.ctx = ctx
-	w.opts = options.ChangeStream()
-	w.watcher = db.database
-	return w
+func (db *database) Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*ChangeStream, error) {
+	return db.database.Watch(ctx, pipeline, opts...)
 }

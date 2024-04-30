@@ -40,7 +40,7 @@ type Client interface {
 
 	Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, error)
 
-	Watch(ctx context.Context, pipeline interface{}) Watcher
+	Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*ChangeStream, error)
 }
 
 type client struct {
@@ -217,13 +217,8 @@ func (c *client) Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, er
 	return &transaction{mongo.NewSessionContext(ctx, sess), true}, nil
 }
 
-func (c *client) Watch(ctx context.Context, pipeline interface{}) Watcher {
-	var w = &watch{}
-	w.pipeline = pipeline
-	w.ctx = ctx
-	w.opts = options.ChangeStream()
-	w.watcher = c.client
-	return w
+func (c *client) Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*ChangeStream, error) {
+	return c.client.Watch(ctx, pipeline, opts...)
 }
 
 func CompareServerVersions(v1 string, v2 string) int {

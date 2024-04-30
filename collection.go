@@ -100,7 +100,7 @@ type Collection interface {
 
 	Aggregate(ctx context.Context, pipeline interface{}) Aggregate
 
-	Watch(ctx context.Context, pipeline interface{}) Watcher
+	Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*ChangeStream, error)
 }
 
 type collection struct {
@@ -272,11 +272,6 @@ func (c *collection) Aggregate(ctx context.Context, pipeline interface{}) Aggreg
 	return a
 }
 
-func (c *collection) Watch(ctx context.Context, pipeline interface{}) Watcher {
-	var w = &watch{}
-	w.pipeline = pipeline
-	w.ctx = ctx
-	w.opts = options.ChangeStream()
-	w.watcher = c.collection
-	return w
+func (c *collection) Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*ChangeStream, error) {
+	return c.collection.Watch(ctx, pipeline, opts...)
 }
