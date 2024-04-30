@@ -6,13 +6,18 @@ import (
 	"testing"
 )
 
+const (
+	kTestURI      = "mongodb+srv://smartwalle:kVeZvFiOwDhnuAco@smartwalle.endqace.mongodb.net/?retryWrites=true&w=majority"
+	kTestDatabase = "test"
+)
+
 type User struct {
 	Id   string `bson:"_id"`
 	Age  int    `bson:"age"`
 	Name string `bson:"name"`
 }
 
-var cfg = dbm.NewConfig("mongodb://mongo:mongo@127.0.0.1")
+var cfg = dbm.NewConfig(kTestURI)
 
 func getDatabase(t *testing.T) dbm.Database {
 	var client, err = dbm.New(context.Background(), cfg)
@@ -20,7 +25,7 @@ func getDatabase(t *testing.T) dbm.Database {
 		t.Fatal("连接数据库发生错误", err)
 	}
 
-	var db = client.Database("test")
+	var db = client.Database(kTestDatabase)
 	return db
 }
 
