@@ -38,7 +38,7 @@ type Client interface {
 
 	StartSession(opts ...*SessionOptions) (Session, error)
 
-	Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, error)
+	BeginTx(ctx context.Context, opts ...*TransactionOptions) (Tx, error)
 
 	Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*ChangeStream, error)
 }
@@ -204,7 +204,7 @@ func (c *client) StartSession(opts ...*SessionOptions) (Session, error) {
 	return &session{sess}, nil
 }
 
-func (c *client) Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, error) {
+func (c *client) BeginTx(ctx context.Context, opts ...*TransactionOptions) (Tx, error) {
 	var sess, err = c.startSession()
 	if err != nil {
 		return nil, err

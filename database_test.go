@@ -29,12 +29,12 @@ func getDatabase(t *testing.T) dbm.Database {
 	return db
 }
 
-func TestDatabase_BeginCommit(t *testing.T) {
+func TestDatabase_BeginTxCommit(t *testing.T) {
 	var db = getDatabase(t)
 	defer db.Client().Close(context.Background())
 	var tUser = db.Collection("user")
 
-	tx, err := db.Begin(context.Background())
+	tx, err := db.BeginTx(context.Background())
 	if err != nil {
 		t.Fatal("开启事务发生错误", err)
 	}
@@ -74,12 +74,12 @@ func TestDatabase_BeginCommit(t *testing.T) {
 	}
 }
 
-func TestDatabase_BeginRollback(t *testing.T) {
+func TestDatabase_BeginTxRollback(t *testing.T) {
 	var db = getDatabase(t)
 	defer db.Client().Close(context.Background())
 	var tUser = db.Collection("user")
 
-	tx, err := db.Begin(context.Background())
+	tx, err := db.BeginTx(context.Background())
 	if err != nil {
 		t.Fatal("开启事务发生错误", err)
 	}
@@ -122,7 +122,7 @@ func TestDatabase_SessionCommit(t *testing.T) {
 	}
 	defer sess.EndSession(context.Background())
 
-	tx, err := sess.Begin(context.Background())
+	tx, err := sess.BeginTx(context.Background())
 	if err != nil {
 		t.Fatal("开启事务发生错误", err)
 	}
@@ -173,7 +173,7 @@ func TestDatabase_SessionRollback(t *testing.T) {
 	}
 	defer sess.EndSession(context.Background())
 
-	tx, err := sess.Begin(context.Background())
+	tx, err := sess.BeginTx(context.Background())
 	if err != nil {
 		t.Fatal("开启事务发生错误", err)
 	}
@@ -215,7 +215,7 @@ func TestDatabase_EndSession(t *testing.T) {
 		t.Fatal("StartSession 发生错误", err)
 	}
 
-	tx, err := sess.Begin(context.Background())
+	tx, err := sess.BeginTx(context.Background())
 	if err != nil {
 		t.Fatal("开启事务发生错误", err)
 	}
@@ -256,7 +256,7 @@ func TestDatabase_EndSession(t *testing.T) {
 
 	sess.EndSession(context.Background())
 
-	tx2, err := sess.Begin(context.Background())
+	tx2, err := sess.BeginTx(context.Background())
 	if err != nil {
 		t.Fatal("开启事务发生错误", err)
 	}

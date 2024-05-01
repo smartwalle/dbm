@@ -23,14 +23,14 @@ type SessionContext = mongo.SessionContext
 type Session interface {
 	mongo.Session
 
-	Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, error)
+	BeginTx(ctx context.Context, opts ...*TransactionOptions) (Tx, error)
 }
 
 type session struct {
 	mongo.Session
 }
 
-func (s *session) Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, error) {
+func (s *session) BeginTx(ctx context.Context, opts ...*TransactionOptions) (Tx, error) {
 	if err := s.Session.StartTransaction(opts...); err != nil {
 		return nil, err
 	}

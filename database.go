@@ -29,7 +29,7 @@ type Database interface {
 
 	StartSession(opts ...*SessionOptions) (Session, error)
 
-	Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, error)
+	BeginTx(ctx context.Context, opts ...*TransactionOptions) (Tx, error)
 
 	Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*ChangeStream, error)
 }
@@ -80,8 +80,8 @@ func (db *database) StartSession(opts ...*SessionOptions) (Session, error) {
 	return db.client.StartSession(opts...)
 }
 
-func (db *database) Begin(ctx context.Context, opts ...*TransactionOptions) (Tx, error) {
-	return db.client.Begin(ctx, opts...)
+func (db *database) BeginTx(ctx context.Context, opts ...*TransactionOptions) (Tx, error) {
+	return db.client.BeginTx(ctx, opts...)
 }
 
 func (db *database) Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*ChangeStream, error) {
